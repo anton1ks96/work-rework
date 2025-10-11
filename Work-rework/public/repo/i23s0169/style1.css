@@ -1,0 +1,88 @@
+*{
+    padding: 0;
+    margin: 0;
+}
+
+html {
+    margin: 0%;
+}
+
+header {
+    width: auto;
+    height: 120px;
+    background: yellow;
+
+}
+
+.logo{
+    text-align: center;
+}
+
+.text{
+    margin-top: 0px;
+    margin-left: 0px;
+    width: 1080px;
+    height: 120px;
+    text-align:center;
+    background-color: grey;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+.text0{
+    margin-top: 80px;
+    margin-left: 400px;
+    width: 120px;
+    height: 80px;
+    text-align:center;
+    background-color: grey;
+    display: flex;
+    flex-direction: row;
+    justify-content: center; 
+}
+.text1{
+    margin-top: 40px;
+    margin-left: 400px;
+    width: 1080px;
+    height: 200px;
+    text-align:center;
+    background-color: grey;
+    display: flex;
+    flex-direction: row;
+    justify-content: center; 
+}
+img {
+    flex-direction: column;
+    margin-top: 80px;
+    width: 1080px;
+    height: 280px;
+    margin-bottom: 80px;
+}
+.flex{
+    margin-top: 40px;
+    display: flex ;
+    flex-direction: row;
+    gap: 370px;
+    justify-content: center;
+}
+
+footer {
+    margin-top: 80px;
+    width: auto;
+    height: 160px;
+    background-color:red;
+}
+
+.g {
+    margin-left: 400px;
+    margin-top: 80px;
+    width: 1080px;
+    height: 40px;
+    background-color: rgb(53, 214, 53);
+}
+.f{
+    margin-top: 80px;
+    width: 1080px;
+    height: 280px;
+    margin-bottom: 80px;  
+}

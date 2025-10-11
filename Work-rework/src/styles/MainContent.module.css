@@ -1,0 +1,290 @@
+:root {
+    --main-bg-color: #0f0f16;
+    --content-bg-color: #21222D;
+    --accent-color: #8A2BE2;
+    --hover-bg-color: rgb(49, 0, 92);
+    --card-border-color: #8A2BE2;
+    --divider-color: #2C2D33;
+    --text-color: #ffffff;
+    --font-size-base: 16px;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--main-bg-color);
+    font-size: var(--font-size-base);
+    font-family: sans-serif;
+    color: var(--text-color);
+}
+
+.container {
+    display: flex;
+    background-color: transparent;
+    align-items: flex-start;
+}
+
+.sidebar {
+    width: 180px;
+    padding: 18px;
+    overflow-y: auto;
+    color: var(--text-color);
+}
+
+.sidebarHeader {
+    margin-bottom: 20px;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.groupList {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.groupButton {
+    padding: 12px;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    width: 80%;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.groupButton:hover {
+    background: var(--hover-bg-color);
+}
+
+.groupButtonActive {
+    background: var(--accent-color);
+    font-weight: 500;
+}
+
+.buttonSeparator {
+    width: 15%;
+    height: 1px;
+    border-radius: 10px;
+    background-color: var(--divider-color);
+    margin: 10px 0;
+}
+
+.divider {
+    position: fixed;
+    top: 0;
+    left: 170px;
+    height: 70vh;
+    width: 1px;
+    background-color: var(--divider-color);
+    margin: 0;
+    z-index: 999;
+}
+  
+.mainContent {
+    flex: 1;
+    padding: 24px;
+    margin: 20px;
+    background-color: var(--content-bg-color);
+    border: 1px solid var(--accent-color);
+    border-radius: 8px;
+    min-width: 0;
+}
+
+.emptyState {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 200px;
+    font-size: 1.1rem;
+    color: var(--text-color);
+}
+
+.gridContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 15px;
+    animation: fadeInAnimation 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+}
+
+.card {
+    border: 1px solid var(--card-border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    transition: transform 0.2s cubic-bezier(0.68, -0.55, 0.27, 1.55), box-shadow 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    aspect-ratio: 3 / 4;
+    background-color: #000;
+    animation: fadeInAnimation 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    border: 1px solid var(--text-color);
+    box-shadow: 0 5px 15px 0 var(--accent-color);
+}
+
+.imageWrapper {
+    background-color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    height: 100%;
+}
+
+.image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.imageWrapper::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0);
+    transition: background 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    z-index: 1;
+}
+
+.card:hover .imageWrapper::before {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.infoOverlay {
+    padding: 12px;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    box-sizing: border-box;
+    line-height: 1.4;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    z-index: 2;
+    color: var(--text-color);
+    background: transparent;
+}
+
+.card:hover .infoOverlay {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.infoOverlay div:first-child {
+    font-size: 1.2rem;
+    margin-bottom: 4px;
+}
+
+.studentId {
+    font-size: 0.8rem;
+    opacity: 0.9;
+}
+
+.iframeContainer {
+    position: relative;
+    width: 100%;
+    margin: auto;
+    background: var(--content-bg-color);
+    border: 1px solid var(--accent-color);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: box-shadow 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    animation: fadeInAnimation 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+}
+
+.iframeContainer:hover {
+    box-shadow: 0 4px 15px rgba(138, 43, 226, 0.5);
+}
+
+.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(135deg, var(--main-bg-color), var(--content-bg-color));
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    backdrop-filter: blur(4px);
+}
+
+.iframeControls {
+    display: flex;
+    justify-content: flex-start; 
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px;
+    background: var(--accent-color);
+    border-bottom: 1px solid var(--hover-bg-color);
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    transition: background 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.iframeControls:hover {
+    background: var(--hover-bg-color);
+}
+
+.backButton,
+.fullscreenButton {
+    padding: 10px 20px;
+    border: 2px solid var(--accent-color);
+    background: transparent;
+    color: var(--text-color);
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: left;
+    transition: background 0.2s cubic-bezier(0.68, -0.55, 0.27, 1.55),
+                border-color 0.2s cubic-bezier(0.68, -0.55, 0.27, 1.55),
+                transform 0.2s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.backButton:hover,
+.fullscreenButton:hover {
+    background: var(--accent-color);
+    border-color: var(--hover-bg-color);
+    transform: translateX(2px);
+}
+
+.backButton:focus,
+.fullscreenButton:focus {
+    outline: 3px solid var(--hover-bg-color);
+}
+
+.backButton:active,
+.fullscreenButton:active {
+    transform: scale(0.98);
+}
+
+@keyframes fadeInAnimation {
+    0% {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.fadeIn {
+    animation: fadeInAnimation 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+}

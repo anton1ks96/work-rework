@@ -1,0 +1,6 @@
+﻿Git clone (link)
+git add .
+git commit -m "123"
+git push
+gir pull
+git status

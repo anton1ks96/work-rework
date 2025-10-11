@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+   <html lang="en">
+    <head>
+     <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       <title>Document</title>
+        </head>
+         <body>
+        <h1>Напишите пожалуйста группу и имя</h1>
+       <p id="t1">Текст</p>
+      <input id="name" type="text">
+     <input id="in2" type="text">
+    <button onclick="work()">OK</button>
+   </body>
+    <script>
+     function work() {
+      inp = document.getElementById("name").value;
+       group = document.getElementById("in2").value;
+         outp = document.getElementById("t1");
+            if (group === "23-14")
+                outp.innerText = "Привет одногруппник!";
+            else
+                outp.innerText = "Привет" + " однокурсник!";
+        }
+    </script>
+    </html>

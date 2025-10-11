@@ -1,0 +1,8 @@
+http://git.students.it-college.ru:8080/
+
+git clone http.......
+git add .
+git commit -m "123"
+git push
+git pull
+git status

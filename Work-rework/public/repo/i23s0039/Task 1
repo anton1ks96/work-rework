@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<style>
+.all {
+height: 1720px;
+width: 1160px;
+border: solid 1px black;
+position: absolute;
+left: 360px;
+top: 120px;
+} 
+ 
+header {
+	height: 118px;
+	width: 1920px;
+	border: solid 1px black;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+}
+
+.title1 {
+	 position: absolute;
+	 left: 40px;
+	 top: 40px;
+	 height: 40px;
+	 width: 160px;
+	 border: solid 1px green;
+	 background-color: #4CEEAE;
+}
+
+.title2 {
+	 position: absolute;
+	 left: 40px;
+	 top: 360px;
+	 height: 40px;
+	 width: 160px;
+	 border: solid 1px green;
+	 background-color: #4CEEAE;
+}
+
+.title3 {
+	 position: absolute;
+	 left: 40px;
+	 top: 680px;
+	 height: 40px;
+	 width: 160px;
+	 border: solid 1px green;
+	 background-color: #4CEEAE;
+}
+
+.pic1 {
+	 position: absolute;
+	 left: 40px;
+	 top: 120px;
+}
+
+.pic2 { 
+	 position: absolute;
+	 left: 40px;
+	 top: 440px;
+	 height: 160px;
+	 width: 160px;
+} 
+ 
+.pic3 {
+	 position: absolute;
+	 left: 40px;
+	 top: 760px;
+	 height: 160px;
+	 width: 160px;
+} 
+
+.text1 {
+	 position: absolute;
+	 top: 40px;
+	 left: 280px;
+	 height: 240px;
+	 width: 840px;
+	 border: solid 1px gray;
+	 background-color:#B2BABB;
+}
+
+.text2 {
+	position: absolute;
+	top: 360px;
+	border: solid 1px gray;
+	height: 240px;
+	width: 840px;
+	left: 280px;
+	background-color:#B2BABB;
+}
+
+.text3 {
+	border: solid 1px gray;
+	position: absolute;
+	height: 240px;
+	width: 840px;
+	top: 680px;
+	left: 280px;
+	background-color:#B2BABB;
+} 
+
+.text4 {
+	border: solid 1px gray;
+	position: absolute;
+	height: 120px;
+	width: 1080px;
+	left: 40px;
+	top: 1000px;
+	background-color:#B2BABB;
+}
+
+.text5 {
+	border: solid 1px gray;
+	position: absolute;
+	height: 120px;
+	width: 1080px;
+	left: 40px;
+	top: 1200px;
+	background-color:#B2BABB;
+} 
+
+.text6 {
+	border: solid 1px gray;
+	position: absolute;
+	height: 280px;
+	width: 280px;
+	left: 80px;
+	top: 1400px;
+	background-color:#B2BABB;
+}
+
+.text7 {
+	border: solid 1px gray;
+	position: absolute;
+	height: 280px;
+	width: 280px;
+	left: 440px;
+	top: 1400px;
+	background-color:#B2BABB;
+}
+
+.text8 {
+	border: solid 1px gray;
+	position: absolute;
+	height: 280px;
+	width: 280px;
+	left: 800px;
+	top: 1400px;
+	background-color:#B2BABB;
+}
+
+footer {
+	position: absolute;
+	left: 0px;
+	top: 1841px;
+	height: 160px;
+	width: 1920px;
+	border: solid 1px red;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+<h1> Заголовок </h1>
+</header>
+
+<div class="all">
+
+	<div class="title1">
+		title1
+	</div>
+	
+	<div class="pic1">
+		<img src="https://dummyimage.com/160x160/28dff0/000">
+	</div>
+	
+	<div class="title2">
+		title2
+	</div>
+	
+	<div class="pic2">
+		<img src="https://dummyimage.com/160x160/28dff0/000">
+	</div>
+	
+	<div class="title3">
+		title3
+	</div>
+	
+	<div class="pic3">
+		<img src="https://dummyimage.com/160x160/28dff0/000">
+	</div>
+	
+	<div class="text1">
+		text text text text text
+	</div>
+	
+	<div class="text2">
+		text text text text text
+	</div>
+	
+	<div class="text3">
+		text text text text text
+	</div>
+
+	<div class="text4">
+		text text text text text
+	</div>
+	
+	<div class="text5">
+		text text text text text
+	</div>
+	
+	<div class="text6">
+		text text text text text
+	</div>
+	
+	<div class="text7">
+		text text text text text
+	</div>
+	
+	<div class="text8">
+		text text text text text
+	</div>
+	
+ </div>
+ 
+
+<footer>
+    <h4>Внутренний портал студентов ИТ-колледжа
+    <p>Этот сайт является внутренним ресурсом ИТ-колледжа ИТхаб-Екатеринбург и предназначен для использования ИСКЛЮЧИТЕЛЬНО преподавателями, администрацией колледжа и родителями студентов колледжа.</p>
+    <p>Если Вы не являетесь сотрудником колледжа или родителем студента колледжа ИТхаб-Екатеринбург, или, если Вы не получили разрешение на доступ от администрации колледжа - просим <strong>немедленно покинуть</strong> этот сайт.</p>
+    <p>Просим воздерживаться от неправомерного или неправомочного доступа.</p>
+</footer>
+
+</body>
+
+</html>

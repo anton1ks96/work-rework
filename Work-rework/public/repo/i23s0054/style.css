@@ -1,0 +1,23 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+h1{
+    background-color: brown;
+    height: 120px;
+
+}
+h2{
+    background-color: forestgreen;
+}
+h3{
+    background-color: antiquewhite;
+}
+h4{
+    background-color: rgb(245, 139, 0);
+}
+header {
+    width: auto;
+    height: 120px;
+}

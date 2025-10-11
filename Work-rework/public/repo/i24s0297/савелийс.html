@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Layout</title>
+  <style>
+    body {
+      display: grid;
+      grid-template-rows: 50px repeat(10, auto) 50px;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+
+    /* Header */
+    header {
+      grid-column: span 12;
+      background-color: yellow;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    /* Footer */
+    footer {
+      grid-column: span 12;
+      background-color: red;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    /* Content sections */
+    .section {
+      grid-column: span 12;
+      background-color: gray;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .title {
+      background-color: green;
+      height: 20px;
+    }
+
+    .image {
+      background-color: blue;
+      height: 100px;
+    }
+
+    .content-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .text {
+      background-color: gray;
+      height: 50px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    Header / Promo
+  </header>
+
+  <!-- Section 1 -->
+  <div class="section">
+    <div class="title"></div>
+    <div class="image"></div>
+  </div>
+
+  <!-- Section 2 -->
+  <div class="section">
+    <div class="title"></div>
+    <div class="image"></div>
+  </div>
+
+  <!-- Section 3 -->
+  <div class="section content-row">
+    <div>
+      <div class="title"></div>
+      <div class="image"></div>
+    </div>
+    <div>
+      <div class="title"></div>
+      <div class="image"></div>
+    </div>
+  </div>
+
+  <!-- Section 4 -->
+  <div class="section">
+    <div class="text"></div>
+    <div class="text"></div>
+    <div class="text"></div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    Footer
+  </footer>
+
+</body>
+</html>

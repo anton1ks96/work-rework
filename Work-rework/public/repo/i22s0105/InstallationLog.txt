@@ -1,0 +1,84 @@
+************************************* Invoked: Чт апр 20 14:49:00 2023
+[0] Arguments: c:\Users\user\Desktop\msys2-x86_64-20220603.exe, -std=c++98, -m64, -Wp,-v, -E, -dM, -x, c++, nul
+[7] Operations sanity check succeeded.
+[10] Language: ru-RU
+[10] Script file does not exist.
+[11] Warning: QMimeDatabase: Error loading internal MIME data
+An error has been encountered at line 1 of <internal MIME data>: ??????????? ????? ?????????.:
+************************************* Invoked: Чт апр 20 14:49:01 2023
+[0] Arguments: c:\Users\user\Desktop\msys2-x86_64-20220603.exe, -std=c++98, -m32, -Wp,-v, -E, -dM, -x, c++, nul
+[5] Operations sanity check succeeded.
+[9] Language: ru-RU
+[9] Script file does not exist.
+[10] Warning: QMimeDatabase: Error loading internal MIME data
+An error has been encountered at line 1 of <internal MIME data>: ??????????? ????? ?????????.:
+************************************* Invoked: Чт апр 20 14:49:01 2023
+[0] Arguments: c:\Users\user\Desktop\msys2-x86_64-20220603.exe, -std=c++98, -Wp,-v, -E, -dM, -x, c++, nul
+[6] Operations sanity check succeeded.
+[9] Language: ru-RU
+[10] Script file does not exist.
+[11] Warning: QMimeDatabase: Error loading internal MIME data
+An error has been encountered at line 1 of <internal MIME data>: ??????????? ????? ?????????.:
+************************************* Invoked: Ср апр 26 12:12:34 2023
+[0] Arguments: c:\Users\user\Desktop\msys2-x86_64-20220603.exe, -std=c++98, -m64, -Wp,-v, -E, -dM, -x, c++, nul
+[5] Operations sanity check succeeded.
+[8] Language: ru-RU
+[8] Script file does not exist.
+[9] Warning: QMimeDatabase: Error loading internal MIME data
+An error has been encountered at line 1 of <internal MIME data>: ??????????? ????? ?????????.:
+************************************* Invoked: Ср апр 26 12:12:35 2023
+[0] Arguments: c:\Users\user\Desktop\msys2-x86_64-20220603.exe, -std=c++98, -m32, -Wp,-v, -E, -dM, -x, c++, nul
+[4] Operations sanity check succeeded.
+[16] Language: ru-RU
+[16] Script file does not exist.
+[17] Warning: QMimeDatabase: Error loading internal MIME data
+An error has been encountered at line 1 of <internal MIME data>: ??????????? ????? ?????????.:
+************************************* Invoked: Ср апр 26 12:12:35 2023
+[0] Arguments: c:\Users\user\Desktop\msys2-x86_64-20220603.exe, -std=c++98, -Wp,-v, -E, -dM, -x, c++, nul
+[4] Operations sanity check succeeded.
+[16] Language: ru-RU
+[16] Script file does not exist.
+[17] Warning: QMimeDatabase: Error loading internal MIME data
+An error has been encountered at line 1 of <internal MIME data>: ??????????? ????? ?????????.:
+************************************* Invoked: Чт май 4 09:32:17 2023
+[0] Arguments: c:\Users\user\Desktop\msys2-x86_64-20220603.exe, -std=c++98, -m64, -Wp,-v, -E, -dM, -x, c++, nul
+[4] Operations sanity check succeeded.
+[7] Language: ru-RU
+[7] Script file does not exist.
+[8] Warning: QMimeDatabase: Error loading internal MIME data
+An error has been encountered at line 1 of <internal MIME data>: ??????????? ????? ?????????.:
+************************************* Invoked: Чт май 4 09:32:18 2023
+[0] Arguments: c:\Users\user\Desktop\msys2-x86_64-20220603.exe, -std=c++98, -m32, -Wp,-v, -E, -dM, -x, c++, nul
+[3] Operations sanity check succeeded.
+[8] Language: ru-RU
+[8] Script file does not exist.
+[9] Warning: QMimeDatabase: Error loading internal MIME data
+An error has been encountered at line 1 of <internal MIME data>: ??????????? ????? ?????????.:
+************************************* Invoked: Чт май 4 09:32:18 2023
+[0] Arguments: c:\Users\user\Desktop\msys2-x86_64-20220603.exe, -std=c++98, -Wp,-v, -E, -dM, -x, c++, nul
+[4] Operations sanity check succeeded.
+[7] Language: ru-RU
+[7] Script file does not exist.
+[8] Warning: QMimeDatabase: Error loading internal MIME data
+An error has been encountered at line 1 of <internal MIME data>: ??????????? ????? ?????????.:
+************************************* Invoked: Чт май 4 09:33:49 2023
+[0] Arguments: c:\Users\user\Desktop\msys2-x86_64-20220603.exe, -std=c17, -m64, -Wp,-v, -E, -dM, -x, c, nul
+[13] Operations sanity check succeeded.
+[16] Language: ru-RU
+[17] Script file does not exist.
+[17] Warning: QMimeDatabase: Error loading internal MIME data
+An error has been encountered at line 1 of <internal MIME data>: ??????????? ????? ?????????.:
+************************************* Invoked: Чт май 4 09:33:49 2023
+[0] Arguments: c:\Users\user\Desktop\msys2-x86_64-20220603.exe, -std=c17, -m32, -Wp,-v, -E, -dM, -x, c, nul
+[3] Operations sanity check succeeded.
+[16] Language: ru-RU
+[16] Script file does not exist.
+[17] Warning: QMimeDatabase: Error loading internal MIME data
+An error has been encountered at line 1 of <internal MIME data>: ??????????? ????? ?????????.:
+************************************* Invoked: Чт май 4 09:33:50 2023
+[0] Arguments: c:\Users\user\Desktop\msys2-x86_64-20220603.exe, -std=c17, -Wp,-v, -E, -dM, -x, c, nul
+[4] Operations sanity check succeeded.
+[16] Language: ru-RU
+[16] Script file does not exist.
+[17] Warning: QMimeDatabase: Error loading internal MIME data
+An error has been encountered at line 1 of <internal MIME data>: ??????????? ????? ?????????.:

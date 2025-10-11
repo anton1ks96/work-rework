@@ -1,0 +1,6 @@
+git clone
+git add .
+git command -m "123"
+git push
+git pull
+git status

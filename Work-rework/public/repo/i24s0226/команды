@@ -1,0 +1,5 @@
+git add .
+gut commit -m "123"
+git push
+git pull
+git status

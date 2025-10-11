@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>BFS Visualization</title>
+    <style>
+        .node {
+            width: 20px;
+            height: 20px;
+            background-color: black;
+            margin: 2px;
+            display: inline-block;
+        }
+
+        .visited {
+            background-color: #4CAF50;
+        }
+
+        .queue {
+            background-color: #2196F3;
+        }
+
+        .start {
+            background-color: #FF0000;
+        }
+
+        .end {
+            background-color: #00FF00;
+        }
+
+        .path {
+            background-color: #FFFF00;
+        }
+
+        .obstacle {
+            background-color: #808080;
+        }
+
+        .selected {
+            outline: 2px solid #FFFFFF;
+            outline-offset: -2px;
+        }
+
+        .breadcrumb {
+            display: inline-block;
+            padding: 2px 4px;
+            background-color: #2196F3;
+            margin-right: 2px;
+        }
+
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(10, min-content);
+        }
+
+        #controls {
+            margin-top: 20px;
+        }
+
+        #timer,
+        #steps {
+            margin-left: 10px;
+        }
+
+        #selectedNodes {
+            margin-top: 10px;
+        }
+
+        #breadcrumbTrail {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>BFS Visualization</h1>
+    <div id="grid"></div>
+    <div id="controls">
+        <button onclick="undoAction()">Undo</button>
+        <button onclick="redoAction()">Redo</button>
+        <button onclick="startBFS()">Start BFS</button>
+        <button onclick="pauseBFS()">Pause</button>
+        <button onclick="stepBFS()">Step BFS</button>
+        <button onclick="resetGrid()">Reset</button>
+        <button onclick="saveConfiguration()">Save Configuration</button>
+        <button onclick="loadConfiguration()">Load Configuration</button>
+        <input type="range" id="speedControl" min="10" max="1000" value="100" oninput="updateSpeed()">
+        <span>Speed: <span id="speedValue">100</span>ms</span>
+        <span id="timer"></span>
+        <span id="steps"></span>
+        <div id="selectedNodes">
+            <p>Tile Filter & Selection Buttons</p>
+            <button onclick="toggleSelectedNode('start')">Start Nodes</button>
+            <button onclick="toggleSelectedNode('end')">End Nodes</button>
+            <button onclick="toggleSelectedNode('obstacle')">Obstacles</button>
+            <div id="currentlySelectedNode"></div>
+            <div id="selectedNodesDisplay"></div>
+        </div>
+        <div id="breadcrumbTrail"></div>
+    </div>
+    <div id="accessibility">
+        <p>Keyboard Shortcuts:</p>
+        <ul>
+            <li>Press 'S' to select Start node</li>
+            <li>Press 'E' to select End node</li>
+            <li>Press 'O' to select Obstacle</li>
+        </ul>
+    </div>
+
+    <script>
+        // Global variables
+        const gridSize = 21; // Set the size of the grid
+        const grid = [];
+        const queue = [];
+        let startNodes = [];
+        let endNodes = [];
+        let obstacles = [];
+        let currentStep = 0;
+        let visitedNodes = new Set();
+        let parents = new Map();
+        let startTime, endTime;
+        let speed = 100;
+        let isPaused = false;
+        let currentlySelectedNode = null;
+        let undoStack = [];
+        let redoStack = [];
+
+        // Create the grid
+        function createGrid() {
+            grid.length = 0;
+            document.getElementById('grid').innerHTML = '';
+            for (let i = 0; i < gridSize * gridSize; i++) {
+                const node = document.createElement('div');
+                node.classList.add('node');
+                node.setAttribute('role', 'button');
+                node.setAttribute('aria-label', `Node ${i}`);
+                node.addEventListener('click', () => toggleNode(i));
+                node.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        toggleNode(i);
+                    }
+                });
+                document.getElementById('grid').appendChild(node);
+                grid.push(node);
+            }
+            updateGridLayout();
+        }
+        createGrid();
+
+        // Add the hovered node display to the HTML
+        const hoveredNodeDisplay = document.createElement('div');
+        hoveredNodeDisplay.id = 'hoveredNodeDisplay';
+        document.getElementById('controls').appendChild(hoveredNodeDisplay);
+
+        // Add event listener for node hover
+        document.querySelectorAll('.node').forEach((node, index) => {
+            node.addEventListener('mouseover', () => displayHoveredNode(index));
+            node.addEventListener('mouseout', () => {
+                hoveredNodeDisplay.textContent = 'Hovered Node: (Row X, Col Y)';
+            });
+        });
+
+        // Display the node that the cursor is currently hovering over
+        function displayHoveredNode(index) {
+            const node = grid[index];
+            const row = Math.floor(index / gridSize);
+            const col = index % gridSize;
+            const str = "Hovered Node: ";
+            if (node.classList.contains('start')) {
+                hoveredNodeDisplay.textContent = str + `Start (Row ${row}, Col ${col})`;
+            } else if (node.classList.contains('end')) {
+                hoveredNodeDisplay.textContent = str + `End (Row ${row}, Col ${col})`;
+            } else if (node.classList.contains('obstacle')) {
+                hoveredNodeDisplay.textContent = str + `Obstacle (Row ${row}, Col ${col})`;
+            } else {
+                hoveredNodeDisplay.textContent = str + `(Row ${row}, Col ${col})`;
+            }
+        }
+
+        // Toggle the start, end, and obstacle nodes
+        function toggleNode(index) {
+            const node = grid[index];
+            if (currentlySelectedNode === 'start') {
+                toggleStartNode(index, node);
+            } else if (currentlySelectedNode === 'end') {
+                toggleEndNode(index, node);
+            } else if (currentlySelectedNode === 'obstacle') {
+                toggleObstacleNode(index, node);
+            } else if (currentlySelectedNode === 'none') {
+                toggleNoneNode(index, node);
+            }
+            undoStack.push({ index, type: currentlySelectedNode, value: node.classList.contains(currentlySelectedNode) });
+            redoStack = [];
+            updateSelectedNodesDisplay();
+            updateCurrentlySelectedNodeDisplay();
+        }
+
+        // Toggle the start node
+        function toggleStartNode(index, node) {
+            if (!startNodes.includes(index)) {
+                startNodes.push(index);
+                node.classList.add('start', 'selected');
+            } else {
+                startNodes = startNodes.filter(start => start !== index);
+                node.classList.remove('start', 'selected');
+            }
+        }
+
+        // Toggle the end node
+        function toggleEndNode(index, node) {
+            if (!endNodes.includes(index)) {
+                endNodes.push(index);
+                node.classList.add('end', 'selected');
+            } else {
+                endNodes = endNodes.filter(end => end !== index);
+                node.classList.remove('end', 'selected');
+            }
+        }
+
+        // Toggle the obstacle node
+        function toggleObstacleNode(index, node) {
+            if (obstacles.includes(index)) {
+                obstacles = obstacles.filter(obs => obs !== index);
+                node.classList.remove('obstacle', 'selected');
+            } else {
+                obstacles.push(index);
+                node.classList.add('obstacle', 'selected');
+            }
+        }
+
+        // Toggle the "none" node
+        function toggleNoneNode(index, node) {
+            if (startNodes.includes(index)) {
+                startNodes = startNodes.filter(start => start !== index);
+                node.classList.remove('start', 'selected');
+            } else if (endNodes.includes(index)) {
+                endNodes = endNodes.filter(end => end !== index);
+                node.classList.remove('end', 'selected');
+            } else if (obstacles.includes(index)) {
+                obstacles = obstacles.filter(obs => obs !== index);
+                node.classList.remove('obstacle', 'selected');
+            }
+        }
+
+        // Add the "None" option to the selection buttons
+        const noneButton = document.createElement('button');
+        noneButton.textContent = 'None';
+        noneButton.onclick = () => toggleSelectedNode('none');
+        document.getElementById('selectedNodes').insertBefore(noneButton, document.getElementById('currentlySelectedNode'));
+
+        // Toggle the display of the selected nodes
+        function toggleSelectedNode(type) {
+            if (type === 'start') {
+                currentlySelectedNode = 'start';
+            } else if (type === 'end') {
+                currentlySelectedNode = 'end';
+            } else if (type === 'obstacle') {
+                currentlySelectedNode = 'obstacle';
+            } else if (type === 'none') {
+                currentlySelectedNode = 'none';
+            }
+            updateSelectedNodesDisplay();
+            updateCurrentlySelectedNodeDisplay();
+        }
+
+        // Update the display of the selected nodes
+        function updateSelectedNodesDisplay() {
+            const selectedNodesDisplay = document.getElementById('selectedNodesDisplay');
+            selectedNodesDisplay.textContent = `Start: ${startNodes.length}, End: ${endNodes.length}, Obstacles: ${obstacles.length}`;
+        }
+
+        // Update the display of the currently selected node
+        function updateCurrentlySelectedNodeDisplay() {
+            const currentlySelectedNodeDisplay = document.getElementById('currentlySelectedNode');
+            if (currentlySelectedNode === 'start') {
+                currentlySelectedNodeDisplay.textContent = 'Currently selected: Start node';
+            } else if (currentlySelectedNode === 'end') {
+                currentlySelectedNodeDisplay.textContent = 'Currently selected: End node';
+            } else if (currentlySelectedNode === 'obstacle') {
+                currentlySelectedNodeDisplay.textContent = 'Currently selected: Obstacle';
+            } else {
+                currentlySelectedNodeDisplay.textContent = '';
+            }
+        }
+
+        // Add event listener for keyboard shortcuts
+        document.addEventListener('keydown', (event) => {
+            if (event.key.toLowerCase() === 's') {
+                toggleSelectedNode('start');
+            } else if (event.key.toLowerCase() === 'e') {
+                toggleSelectedNode('end');
+            } else if (event.key.toLowerCase() === 'o') {
+                toggleSelectedNode('obstacle');
+            }
+        });
+
+        // Add undo functionality
+        function undoAction() {
+            if (undoStack.length > 0) {
+                const action = undoStack.pop();
+                redoStack.push(action);
+                toggleNode(action.index, action.type, action.value);
+            }
+        }
+
+        // Add redo functionality
+        function redoAction() {
+            if (redoStack.length > 0) {
+                const action = redoStack.pop();
+                undoStack.push(action);
+                toggleNode(action.index, action.type, action.value);
+            }
+        }
+
+        // Save the current grid configuration
+        function saveConfiguration() {
+            const configuration = {
+                startNodes: [...startNodes],
+                endNodes: [...endNodes],
+                obstacles: [...obstacles],
+            };
+            localStorage.setItem('gridConfiguration', JSON.stringify(configuration));
+        }
+
+        // Load a saved grid configuration
+        function loadConfiguration() {
+            const savedConfiguration = JSON.parse(localStorage.getItem('gridConfiguration'));
+            if (savedConfiguration) {
+                resetGrid();
+                startNodes = [...savedConfiguration.startNodes];
+                endNodes = [...savedConfiguration.endNodes];
+                obstacles = [...savedConfiguration.obstacles];
+                startNodes.forEach(node => grid[node].classList.add('start', 'selected'));
+                endNodes.forEach(node => grid[node].classList.add('end', 'selected'));
+                obstacles.forEach(node => grid[node].classList.add('obstacle', 'selected'));
+                updateSelectedNodesDisplay();
+                updateCurrentlySelectedNodeDisplay();
+            }
+        }
+
+        // Animate the path tracing
+        function animatePathTracing(path) {
+            let i = 0;
+            const interval = setInterval(() => {
+                if (i < path.length) {
+                    grid[path[i]].classList.add('path');
+                    i++;
+                } else {
+                    clearInterval(interval);
+                }
+            }, speed / 2);
+        }
+
+        // Display the breadcrumb trail
+        function displayBreadcrumbTrail(currentNode) {
+            const breadcrumbTrail = document.getElementById('breadcrumbTrail');
+            breadcrumbTrail.innerHTML = '';
+            let node = currentNode;
+            while (parents.has(node)) {
+                const breadcrumb = document.createElement('div');
+                breadcrumb.classList.add('breadcrumb');
+                breadcrumb.textContent = node;
+                breadcrumbTrail.prepend(breadcrumb);
+                node = parents.get(node);
+            }
+        }
+
+        // Perform BFS step-by-step
+        function stepBFS() {
+            if (startNodes.length === 0 || endNodes.length === 0) {
+                alert('Please select at least one start and end node.');
+                return;
+            }
+
+            if (currentStep === 0) {
+                startTime = performance.now();
+                startNodes.forEach(node => {
+                    queue.push(node);
+                    visitedNodes.add(node);
+                    grid[node].classList.add('queue');
+                });
+            }
+
+            if (queue.length > 0) {
+                const currentNode = queue.shift();
+                grid[currentNode].classList.remove('queue');
+                grid[currentNode].classList.add('visited');
+                displayBreadcrumbTrail(currentNode);
+
+                if (endNodes.includes(currentNode)) {
+                    endTime = performance.now();
+                    const path = reconstructPath(currentNode);
+                    animatePathTracing(path);
+                    alert(`Path found in ${((endTime - startTime) / 1000).toFixed(2)} seconds and ${currentStep} steps.`);
+                    currentStep = 0;
+                    visitedNodes.clear();
+                    parents.clear();
+                    return;
+                }
+
+                const neighbors = getNeighbors(currentNode);
+                for (const neighbor of neighbors) {
+                    if (currentAlgorithm === 'BFS') {
+                        if (!visitedNodes.has(neighbor) && !grid[neighbor].classList.contains('queue') && !grid[neighbor].classList.contains('obstacle')) {
+                            queue.push(neighbor);
+                            visitedNodes.add(neighbor);
+                            parents.set(neighbor, currentNode);
+                            grid[neighbor].classList.add('queue');
+                        }
+                    } else if (currentAlgorithm === 'Dijkstra') {
+                        alert("TODO!!");
+                        // Dijkstra's algorithm implementation
+                    } else if (currentAlgorithm === 'A*') {
+                        alert("TODO!!");
+                        // A* algorithm implementation
+                    }
+                }
+
+                currentStep++;
+                updateStepCounter();
+                if (!isPaused) {
+                    setTimeout(stepBFS, speed);
+                }
+            } else {
+                alert('Path not found.');
+                currentStep = 0;
+                visitedNodes.clear();
+                parents.clear();
+                startNodes.forEach(node => grid[node].classList.add('start'));
+                endNodes.forEach(node => grid[node].classList.add('end'));
+            }
+        }
+
+        // Pause the BFS
+        function pauseBFS() {
+            isPaused = !isPaused;
+            if (!isPaused) {
+                stepBFS();
+            }
+        }
+
+        // Perform BFS
+        function startBFS() {
+            currentStep = 0;
+            visitedNodes.clear();
+            parents.clear();
+            queue.length = 0;
+            startTime = null;
+            endTime = null;
+            isPaused = false;
+            updateTimer();
+            updateStepCounter();
+            stepBFS();
+        }
+
+        // Reset the grid
+        function resetGrid() {
+            startNodes = [];
+            endNodes = [];
+            obstacles = [];
+            grid.forEach(node => {
+                node.classList.remove('start', 'end', 'visited', 'queue', 'path', 'obstacle', 'selected');
+            });
+            currentStep = 0;
+            visitedNodes.clear();
+            parents.clear();
+            updateTimer();
+            updateStepCounter();
+            updateSelectedNodesDisplay();
+        }
+
+        // Reconstruct the path from the end node to the start node
+        function reconstructPath(endNode) {
+            const path = [endNode];
+            let currentNode = endNode;
+            while (parents.has(currentNode)) {
+                currentNode = parents.get(currentNode);
+                path.unshift(currentNode);
+            }
+            return path;
+        }
+
+        // Get the neighbors of a node
+        function getNeighbors(index) {
+            const neighbors = [];
+            const row = Math.floor(index / gridSize);
+            const col = index % gridSize;
+
+            // Check left neighbor
+            if (col > 0 && !grid[index - 1].classList.contains('obstacle')) {
+                neighbors.push(index - 1);
+            }
+            // Check right neighbor
+            if (col < gridSize - 1 && !grid[index + 1].classList.contains('obstacle')) {
+                neighbors.push(index + 1);
+            }
+            // Check top neighbor
+            if (row > 0 && !grid[index - gridSize].classList.contains('obstacle')) {
+                neighbors.push(index - gridSize);
+            }
+            // Check bottom neighbor
+            if (row < gridSize - 1 && !grid[index + gridSize].classList.contains('obstacle')) {
+                neighbors.push(index + gridSize);
+            }
+
+            return neighbors;
+        }
+
+        // Update the timer display
+        function updateTimer() {
+            const timerElement = document.getElementById('timer');
+            if (startTime && endTime) {
+                const duration = (endTime - startTime) / 1000;
+                timerElement.textContent = `Time: ${duration.toFixed(2)} seconds`;
+            } else {
+                timerElement.textContent = '';
+            }
+        }
+
+        // Update the step counter display
+        function updateStepCounter() {
+            const stepsElement = document.getElementById('steps');
+            stepsElement.textContent = `Steps: ${currentStep}`;
+        }
+
+        // Update the speed control
+        function updateSpeed() {
+            const speedControl = document.getElementById('speedControl');
+            const speedValue = document.getElementById('speedValue');
+            speed = parseInt(speedControl.value);
+            speedValue.textContent = speed;
+        }
+
+        // Update the grid layout
+        function updateGridLayout() {
+            document.getElementById('grid').style.gridTemplateColumns = `repeat(${gridSize}, min-content)`;
+        }
+
+        // Add a slider for obstacle density control
+        const obstacleDensitySlider = document.createElement('input');
+        obstacleDensitySlider.type = 'range';
+        obstacleDensitySlider.min = '0';
+        obstacleDensitySlider.max = '80';
+        obstacleDensitySlider.value = '20';
+        obstacleDensitySlider.addEventListener('input', () => {
+            const density = parseInt(obstacleDensitySlider.value);
+            generateObstacles(density);
+        });
+        // Add the obstacle density slider to the controls
+        const obstacleDensityContainer = document.createElement('div');
+        obstacleDensityContainer.textContent = 'Obstacle Density: ';
+        obstacleDensityContainer.appendChild(obstacleDensitySlider);
+        document.getElementById('controls').appendChild(obstacleDensityContainer);
+
+        // Generate obstacles based on the density
+        function generateObstacles(density) {
+            resetGrid();
+            const numObstacles = Math.floor((gridSize * gridSize * density) / 100);
+            for (let i = 0; i < numObstacles; i++) {
+                const index = Math.floor(Math.random() * (gridSize * gridSize));
+                if (!startNodes.includes(index) && !endNodes.includes(index)) {
+                    obstacles.push(index);
+                    grid[index].classList.add('obstacle', 'selected');
+                }
+            }
+            updateSelectedNodesDisplay();
+            updateCurrentlySelectedNodeDisplay();
+        }
+
+        // Add a dropdown to select the pathfinding algorithm
+        const algorithmSelect = document.createElement('select');
+        const algorithms = ['BFS', 'Dijkstra', 'A*'];
+        algorithms.forEach(algo => {
+            const option = document.createElement('option');
+            option.value = algo;
+            option.textContent = algo;
+            algorithmSelect.appendChild(option);
+        });
+        algorithmSelect.addEventListener('change', () => {
+            currentAlgorithm = algorithmSelect.value;
+        });
+
+        // Add the algorithm select to the controls
+        const algorithmContainer = document.createElement('div');
+        algorithmContainer.textContent = 'Algorithm: ';
+        algorithmContainer.appendChild(algorithmSelect);
+        document.getElementById('controls').appendChild(algorithmContainer);
+
+        // Update the stepBFS function to handle different algorithms
+        let currentAlgorithm = 'BFS';
+
+        // Add ARIA labels and keyboard navigation
+        document.querySelectorAll('.node').forEach((node, index) => {
+            node.setAttribute('role', 'button');
+            node.setAttribute('aria-label', `Node ${index}`);
+            node.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    toggleNode(index);
+                }
+            });
+        });
+
+        document.querySelectorAll('button').forEach(button => {
+            button.setAttribute('role', 'button');
+            button.setAttribute('tabindex', '0');
+        });
+
+        document.querySelectorAll('input[type="range"]').forEach(input => {
+            input.setAttribute('role', 'slider');
+            input.setAttribute('aria-valuemin', input.min);
+            input.setAttribute('aria-valuemax', input.max);
+            input.setAttribute('aria-valuenow', input.value);
+        });
+
+        // Add screen reader support
+        const screenReaderOutput = document.createElement('div');
+        screenReaderOutput.setAttribute('aria-live', 'polite');
+        screenReaderOutput.setAttribute('role', 'region');
+        document.body.appendChild(screenReaderOutput);
+
+        function updateScreenReaderOutput(message) {
+            screenReaderOutput.textContent = message;
+        }
+
+    </script>
+</body>
+
+</html>
