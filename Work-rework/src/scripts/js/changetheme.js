@@ -1,9 +1,8 @@
 const themeToggle = document.querySelector('.theme-toggle');
 
-    // Создание плашки "альфа"
     const sunAlphaBadge = document.createElement('div');
     sunAlphaBadge.textContent = 'альфа';
-    sunAlphaBadge.style.display = 'none'; // По умолчанию скрыто
+    sunAlphaBadge.style.display = 'none';
     sunAlphaBadge.style.position = 'absolute';
     sunAlphaBadge.style.top = '-10px';
     sunAlphaBadge.style.right = '-6px';
@@ -38,17 +37,16 @@ const themeToggle = document.querySelector('.theme-toggle');
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('theme', theme);
 
-        // Показать/скрыть плашку с анимацией
         if (theme === 'dark') {
             sunAlphaBadge.style.display = 'block';
             setTimeout(() => {
                 sunAlphaBadge.style.opacity = '1';
-            }, 0); // Даем время для отрисовки элемента перед изменением прозрачности
+            }, 0);
         } else {
             sunAlphaBadge.style.opacity = '0';
             setTimeout(() => {
                 sunAlphaBadge.style.display = 'none';
-            }, 500); // Таймер синхронизирован с длительностью анимации
+            }, 500);
         }
     };
 

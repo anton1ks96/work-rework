@@ -1,4 +1,19 @@
 :root {
+    --main-bg-color: #ffffff;
+    --content-bg-color: #f9f9f9;
+    --accent-color: #8A2BE2;
+    --hover-bg-color: rgba(138, 43, 226, 0.1);
+    --card-border-color: #8A2BE2;
+    --divider-color: #e0e0e0;
+    --text-color: #000000;
+    --font-size-base: 16px;
+    --preloader-bg: rgba(249, 249, 249, 0.8);
+    --mobile-bg: #f0f2f5;
+    --mobile-text: #000000;
+    --burger-bg: rgba(240, 242, 245, 0.9);
+}
+
+[data-theme="dark"] {
     --main-bg-color: #0f0f16;
     --content-bg-color: #21222D;
     --accent-color: #8A2BE2;
@@ -7,6 +22,10 @@
     --divider-color: #2C2D33;
     --text-color: #ffffff;
     --font-size-base: 16px;
+    --preloader-bg: rgba(33, 34, 45, 0.8);
+    --mobile-bg: #21222D;
+    --mobile-text: #ffffff;
+    --burger-bg: rgba(33, 34, 45, 0.9);
 }
 
 html,
@@ -25,11 +44,15 @@ body {
     align-items: flex-start;
 }
 
-.sidebar {
+.sidebarDesktop {
     width: 180px;
     padding: 18px;
     overflow-y: auto;
     color: var(--text-color);
+    position: sticky;
+    top: 90px;
+    align-self: flex-start;
+    max-height: calc(100vh - 80px);
 }
 
 .sidebarHeader {
@@ -42,18 +65,20 @@ body {
     display: flex;
     align-items: center;
     flex-direction: column;
+    margin-right: 10px;
     gap: 8px;
 }
 
 .groupButton {
+    position: relative;
     padding: 12px;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     background: transparent;
     cursor: pointer;
     text-align: center;
-    transition: all 0.2s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-    width: 80%;
+    transition: all 0.2s;
+    width: 90%;
     font-size: 1rem;
     font-weight: 500;
     color: var(--text-color);
@@ -63,9 +88,33 @@ body {
     background: var(--hover-bg-color);
 }
 
+.groupButton:active {
+    transform: scale(0.97);
+    box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.3);
+}
+
 .groupButtonActive {
     background: var(--accent-color);
     font-weight: 500;
+}
+
+:root .groupButtonActive {
+    color: #ffffff;
+}
+
+.dividerIndicator {
+    position: fixed;
+    left: 168px;
+    width: 3px;
+    height: 26px;
+    background-color: var(--accent-color);
+    border-radius: 2px 0px 0px 2px;
+    transition: top 0.3s ease;
+    z-index: 1000;
+}
+
+.searchFloatingIndicator {
+    background-color: #5C73A6;
 }
 
 .buttonSeparator {
@@ -86,7 +135,7 @@ body {
     margin: 0;
     z-index: 999;
 }
-  
+
 .mainContent {
     flex: 1;
     padding: 24px;
@@ -95,6 +144,7 @@ body {
     border: 1px solid var(--accent-color);
     border-radius: 8px;
     min-width: 0;
+    position: relative;
 }
 
 .emptyState {
@@ -111,7 +161,12 @@ body {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 15px;
-    animation: fadeInAnimation 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.fadeOut {
+    opacity: 0;
 }
 
 .card {
@@ -119,10 +174,9 @@ body {
     border-radius: 8px;
     overflow: hidden;
     position: relative;
-    transition: transform 0.2s cubic-bezier(0.68, -0.55, 0.27, 1.55), box-shadow 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-    aspect-ratio: 3 / 4;
-    background-color: #000;
-    animation: fadeInAnimation 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+    transition: transform 0.2s ease, box-shadow 0.4s ease;
+    aspect-ratio: 3/4;
+    background-color: var(--content-bg-color);
 }
 
 .card:hover {
@@ -132,7 +186,7 @@ body {
 }
 
 .imageWrapper {
-    background-color: #000;
+    background-color: var(--content-bg-color);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -154,7 +208,7 @@ body {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0);
-    transition: background 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    transition: background 0.3s ease;
     z-index: 1;
 }
 
@@ -171,9 +225,9 @@ body {
     line-height: 1.4;
     opacity: 0;
     transform: translateY(10px);
-    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    transition: all 0.3s ease;
     z-index: 2;
-    color: var(--text-color);
+    color: #ffffff;
     background: transparent;
 }
 
@@ -200,8 +254,7 @@ body {
     border: 1px solid var(--accent-color);
     border-radius: 10px;
     overflow: hidden;
-    transition: box-shadow 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-    animation: fadeInAnimation 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+    transition: box-shadow 0.3s ease;
 }
 
 .iframeContainer:hover {
@@ -234,7 +287,7 @@ body {
     border-bottom: 1px solid var(--hover-bg-color);
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
-    transition: background 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    transition: background 0.3s ease;
 }
 
 .iframeControls:hover {
@@ -252,9 +305,7 @@ body {
     font-size: 16px;
     font-weight: 600;
     text-align: left;
-    transition: background 0.2s cubic-bezier(0.68, -0.55, 0.27, 1.55),
-                border-color 0.2s cubic-bezier(0.68, -0.55, 0.27, 1.55),
-                transform 0.2s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 .backButton:hover,
@@ -274,17 +325,231 @@ body {
     transform: scale(0.98);
 }
 
-@keyframes fadeInAnimation {
+:global(.cardEnter) {
+    animation: fadeInUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes fadeInUp {
     0% {
         opacity: 0;
-        transform: scale(0.95);
+        transform: translateY(20px) scale(0.98) rotate(2deg);
     }
     100% {
         opacity: 1;
-        transform: scale(1);
+        transform: translateY(0) scale(1);
     }
 }
 
-.fadeIn {
-    animation: fadeInAnimation 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+.preloader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--preloader-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+}
+
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid var(--accent-color);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+    .divider {
+        display: none !important;
+    }
+    .mainContent {
+        background-color: transparent !important;
+        margin: 0 !important;
+        padding: 28px !important;
+        border: none !important;
+    }
+    .gridContainer {
+        margin: 0 !important;
+        padding: 0 !important;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebarDesktop { display: none; }
+
+    .sidebarMobile {
+        position: fixed;
+        top: 10%;
+        right: 0;
+        width: 250px;
+        height: 90%;
+        background-color: transparent;
+        z-index: 2000;
+        transition: transform 0.3s ease;
+        transform: translateX(100%);
+        padding: 16px 12px;
+    }
+
+    .sidebarMobileVisible {
+        transform: translateX(0);
+    }
+
+    .sidebarMobileHidden {
+        transform: translateX(100%);
+    }
+
+    .groupButton {
+        width: 80%;
+    }
+}
+
+@media (max-width: 768px) {
+    .burgerButton {
+        position: fixed;
+        top: 16px;
+        left: 16px;
+        background: var(--burger-bg);
+        color: var(--text-color);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        font-size: 22px;
+        padding: 8px 14px;
+        border-radius: 8px;
+        z-index: 9999;
+        cursor: pointer;
+    }
+
+    .burgerButton:hover {
+        background: var(--mobile-bg);
+    }
+}
+
+@media (max-width: 768px) {
+    .mobileSearchBar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        padding: 10px 12px;
+        background: transparent;
+        z-index: 3000;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-sizing: border-box;
+    }
+
+    .mobileSearchInputWrapper {
+    background: var(--mobile-bg);
+        border: 1px solid transparent;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        padding: 0 15px;
+        gap: 8px;
+        flex: 1 1 auto;
+        margin-right: 6px;
+        height: 44px;
+        transition: all 0.3s ease;
+    }
+
+    .mobileSearchInputWrapper:focus-within {
+        border-color: var(--accent-color);
+        background: rgba(255, 255, 255, 0.07);
+    }
+
+    .mobileSearchIcon {
+        width: 20px;
+        height: 20px;
+        fill: #c9c9c9;
+        flex-shrink: 0;
+    }
+
+    .mobileSearchInput {
+        flex: 1;
+        border: none;
+        background: transparent;
+        color: var(--mobile-text);
+        font-size: 16px;
+        outline: none;
+    }
+
+    .mobileSearchInput::placeholder {
+        color: #c9c9c9;
+    }
+
+    .mobileBurgerButton {
+        flex: 0 0 auto;
+        height: 44px;
+        width: 52px;
+        padding: 0;
+    border-radius: 8px;
+        border: 1px solid transparent;
+    background: var(--mobile-bg);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .mobileBurgerButton:active {
+        transform: scale(0.98);
+    }
+
+    .mobileBurgerButton:hover,
+    .mobileBurgerButton:focus {
+        border-color: var(--accent-color);
+    }
+
+    .mobileBurgerButton span {
+        position: absolute;
+        display: block;
+        width: 22px;
+        height: 2px;
+        background: var(--mobile-text);
+        border-radius: 2px;
+        transition: all 0.3s ease;
+    }
+
+    .mobileBurgerButton span:nth-child(1) { top: 15px; }
+    .mobileBurgerButton span:nth-child(2) { top: 21px; }
+    .mobileBurgerButton span:nth-child(3) { top: 27px; }
+
+    .mobileBurgerButton.open span:nth-child(1) {
+        transform: translateY(6px) rotate(45deg);
+    }
+    .mobileBurgerButton.open span:nth-child(2) {
+        opacity: 0;
+    }
+    .mobileBurgerButton.open span:nth-child(3) {
+        transform: translateY(-6px) rotate(-45deg);
+    }
+}
+
+@media (max-width: 480px) {
+    .mobileSearchBar { padding:8px 10px; gap:8px; }
+    .mobileBurgerButton { width:48px; }
+
+    /* New animated compact search */
+    .searchWrapper { position:relative; height:44px; flex:1; }
+    .searchAnimated { position:absolute; top:0; left:0; height:44px; display:flex; align-items:center; background:var(--mobile-bg); border:1px solid var(--accent-color); border-radius:14px; padding:0 10px; gap:6px; width:44px; overflow:hidden; transition: width .35s cubic-bezier(.4,.12,.2,1), background .3s ease; }
+    .searchAnimated.expanded { width:100%; }
+    .searchAnimated input { flex:1; border:none; background:transparent; color:var(--mobile-text); font-size:15px; opacity:0; transform:translateY(4px); transition:opacity .25s ease .12s, transform .35s cubic-bezier(.4,.12,.2,1); min-width:120px; }
+    .searchAnimated.expanded input { opacity:1; transform:translateY(0); }
+    .searchIconBtn { width:26px; height:26px; display:flex; align-items:center; justify-content:center; color:var(--mobile-text); flex-shrink:0; cursor:pointer; }
+    .closeSearchBtn { width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:50%; border:none; background:rgba(0,0,0,0.05); color:var(--mobile-text); cursor:pointer; opacity:0; transform:scale(.7) rotate(-20deg); transition:opacity .25s ease .18s, transform .4s cubic-bezier(.4,.12,.2,1); }
+    .searchAnimated.expanded .closeSearchBtn { opacity:1; transform:scale(1) rotate(0deg); }
+    .closeSearchBtn:active { transform:scale(.9); }
 }
