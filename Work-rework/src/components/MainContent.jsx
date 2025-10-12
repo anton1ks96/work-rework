@@ -4,7 +4,8 @@ import styles from "../styles/MainContent.module.css";
 import "../styles/index.css";
 import StudentCard from './ui/StudentCard';
 import Loader from './ui/Loader';
-import { fetchGroups, fetchStudents } from '../services/api';
+import { fetchGroups, fetchStudents, searchStudents } from '../services/api';
+import { validateSearchQuery } from '../utils/searchValidation';
 
 const MainContent = ({ searchQuery, isMobileSidebarVisible, setIsMobileSidebarVisible, setSearchQuery  }) => {
   const [users, setUsers] = useState([]);
@@ -18,13 +19,14 @@ const MainContent = ({ searchQuery, isMobileSidebarVisible, setIsMobileSidebarVi
   const [searchInput, setSearchInput] = useState("");
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth <= 768 : false);
   const [isCompactSearchOpen, setIsCompactSearchOpen] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchValidation, setSearchValidation] = useState(null);
 
 
-  // Load groups and all students from API on mount
+  // Load groups from API on mount
   useEffect(() => {
-    const loadData = async () => {
+    const loadGroups = async () => {
       try {
-        // Load groups
         const groupsData = await fetchGroups();
 
         // Sort groups by year (descending) and number
@@ -40,15 +42,6 @@ const MainContent = ({ searchQuery, isMobileSidebarVisible, setIsMobileSidebarVi
 
         setGroups(sortedGroups);
 
-        // Load students for all groups in parallel
-        const studentsPromises = sortedGroups.map(group => fetchStudents(group));
-        const studentsArrays = await Promise.all(studentsPromises);
-
-        // Flatten the array of arrays into a single array of all students
-        const allStudents = studentsArrays.flat();
-
-        setUsers(allStudents);
-
         // Auto-select first group if "ИТ24-11" exists
         if (sortedGroups.includes("ИТ24-11")) {
           setSelectedGroup("ИТ24-11");
@@ -57,17 +50,39 @@ const MainContent = ({ searchQuery, isMobileSidebarVisible, setIsMobileSidebarVi
 
         setIsLoading(false);
       } catch (error) {
-        console.error("Ошибка при загрузке данных:", error);
+        console.error("Ошибка при загрузке групп:", error);
         setIsLoading(false);
       }
     };
 
-    loadData();
+    loadGroups();
 
     if (window.innerWidth <= 768) {
       setIsMobileSidebarVisible(true);
     }
   }, [setIsMobileSidebarVisible]);
+
+  useEffect(() => {
+    if (!displayedGroup) {
+      setUsers([]);
+      return;
+    }
+
+    const loadStudents = async () => {
+      setIsContentLoading(true);
+      try {
+        const studentsData = await fetchStudents(displayedGroup);
+        setUsers(studentsData);
+      } catch (error) {
+        console.error(`Ошибка при загрузке студентов группы ${displayedGroup}:`, error);
+        setUsers([]);
+      } finally {
+        setIsContentLoading(false);
+      }
+    };
+
+    loadStudents();
+  }, [displayedGroup]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -88,13 +103,38 @@ const MainContent = ({ searchQuery, isMobileSidebarVisible, setIsMobileSidebarVi
   };
 
   useEffect(() => {
-    if (searchQuery && searchQuery.length >= 2) {
-      setIsContentLoading(true);
-      const timer = setTimeout(() => {
-        setIsContentLoading(false);
-      }, 200);
-      return () => clearTimeout(timer);
+    if (!searchQuery || searchQuery.length === 0) {
+      setSearchResults([]);
+      setSearchValidation(null);
+      return;
     }
+
+    const debounceTimer = setTimeout(() => {
+      const validation = validateSearchQuery(searchQuery);
+      setSearchValidation(validation);
+
+      if (validation.shouldSearch) {
+        const performSearch = async () => {
+          setIsContentLoading(true);
+          try {
+            const results = await searchStudents(searchQuery);
+            setSearchResults(results);
+          } catch (error) {
+            console.error('Search error:', error);
+            setSearchResults([]);
+          } finally {
+            setIsContentLoading(false);
+          }
+        };
+
+        performSearch();
+      } else {
+        setSearchResults([]);
+        setIsContentLoading(false);
+      }
+    }, 1000);
+
+    return () => clearTimeout(debounceTimer);
   }, [searchQuery]);
 
   useEffect(() => {
@@ -145,31 +185,13 @@ const MainContent = ({ searchQuery, isMobileSidebarVisible, setIsMobileSidebarVi
     }
   };
 
-  const filteredUsers =
-    searchQuery && searchQuery.length >= 2
-      ? users.filter((user) => {
-          const fullName = `${user.first_name} ${user.last_name}`.toLowerCase();
-          return (
-            fullName.includes(searchQuery.toLowerCase()) ||
-            user.id.toLowerCase().includes(searchQuery.toLowerCase())
-          );
-        })
-      : displayedGroup
-      ? users.filter((user) => user.group === displayedGroup)
-      : [];
+  // Determine which students to display
+  const filteredUsers = searchQuery && searchQuery.length > 0
+    ? searchResults  // Show global search results
+    : users;         // Show students from selected group
 
-  const searchMatchedGroups = groups.filter(
-    (group) =>
-      searchQuery &&
-      searchQuery.length >= 2 &&
-      users.some(
-        (user) =>
-          user.group === group &&
-          (user.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            user.last_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            user.id.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
-  );
+  // Search matched groups - disabled since we only load students for selected group
+  const searchMatchedGroups = [];
 
   const closeCompactSearch = () => setIsCompactSearchOpen(false);
 
@@ -236,6 +258,8 @@ const MainContent = ({ searchQuery, isMobileSidebarVisible, setIsMobileSidebarVi
             </div>
           ) : isLoading ? (
             <Loader type="skeleton" count={8} />
+          ) : searchValidation && !searchValidation.shouldSearch ? (
+            <div className={styles.emptyState}>{searchValidation.reason}</div>
           ) : (
             <div className={styles.emptyState}>Нет результатов</div>
           )

@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8070';
 
 /**
  * Fetches all groups from the backend
@@ -49,6 +49,10 @@ export const fetchStudents = async (groupName) => {
 
     const data = await response.json();
 
+    if (!data.students || !Array.isArray(data.students)) {
+      return [];
+    }
+
     return data.students.map(student => {
         const nameParts = student.username.split(' ');
         const lastName = nameParts[0] || '';
@@ -64,6 +68,53 @@ export const fetchStudents = async (groupName) => {
     });
   } catch (error) {
     console.error(`Error fetching students for group ${groupName}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Searches for students globally across all groups
+ * @param {string} query - Search query (name or ID)
+ * @returns {Promise<Array<Object>>} Array of matching student objects
+ */
+export const searchStudents = async (query) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/v1/search/students`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to search students: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!data.students || !Array.isArray(data.students)) {
+      return [];
+    }
+
+    return data.students.map(student => {
+        const nameParts = student.username.split(' ');
+        const lastName = nameParts[0] || '';
+        const firstName = nameParts.slice(1).join(' ') || '';
+
+        return {
+            id: student.id,
+            last_name: lastName,
+            first_name: firstName,
+            avatar_path: student.photoUrl ? `${API_BASE_URL}${student.photoUrl}` : '',
+            group: student.groupName || '',
+        };
+    });
+  } catch (error) {
+    console.error(`Error searching students for query "${query}":`, error);
     throw error;
   }
 };
