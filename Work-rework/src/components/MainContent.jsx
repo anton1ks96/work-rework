@@ -4,6 +4,7 @@ import styles from "../styles/MainContent.module.css";
 import "../styles/index.css";
 import StudentCard from './ui/StudentCard';
 import Loader from './ui/Loader';
+import { fetchGroups, fetchStudents } from '../services/api';
 
 const MainContent = ({ searchQuery, isMobileSidebarVisible, setIsMobileSidebarVisible, setSearchQuery  }) => {
   const [users, setUsers] = useState([]);
@@ -12,8 +13,6 @@ const MainContent = ({ searchQuery, isMobileSidebarVisible, setIsMobileSidebarVi
   const [displayedGroup, setDisplayedGroup] = useState(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [iframeUrl, setIframeUrl] = useState(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [isContentLoading, setIsContentLoading] = useState(false);
   const groupRefs = useRef({});
   const [searchInput, setSearchInput] = useState("");
@@ -21,33 +20,53 @@ const MainContent = ({ searchQuery, isMobileSidebarVisible, setIsMobileSidebarVi
   const [isCompactSearchOpen, setIsCompactSearchOpen] = useState(false);
 
 
-    useEffect(() => {
-    fetch("/datas.json")
-      .then((response) => response.json())
-      .then((data) => {
-        setUsers(data);
-        const uniqueGroups = [...new Set(data.map((u) => u.group))].filter(Boolean);
-        const sortedGroups = uniqueGroups.sort((a, b) => {
-          const [aYear, aNum] = a.split("-").map(Number);
-          const [bYear, bNum] = b.split("-").map(Number);
+  // Load groups and all students from API on mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        // Load groups
+        const groupsData = await fetchGroups();
+
+        // Sort groups by year (descending) and number
+        // Format: "ИТ21-11" -> extract "21-11" for sorting
+        const sortedGroups = groupsData.sort((a, b) => {
+          const aName = a.replace(/^ИТ/, '');
+          const bName = b.replace(/^ИТ/, '');
+          const [aYear, aNum] = aName.split("-").map(Number);
+          const [bYear, bNum] = bName.split("-").map(Number);
           if (bYear !== aYear) return bYear - aYear;
           return aNum - bNum;
         });
+
         setGroups(sortedGroups);
-        if (sortedGroups.includes("24-11")) {
-          setSelectedGroup("24-11");
-          setDisplayedGroup("24-11");
+
+        // Load students for all groups in parallel
+        const studentsPromises = sortedGroups.map(group => fetchStudents(group));
+        const studentsArrays = await Promise.all(studentsPromises);
+
+        // Flatten the array of arrays into a single array of all students
+        const allStudents = studentsArrays.flat();
+
+        setUsers(allStudents);
+
+        // Auto-select first group if "ИТ24-11" exists
+        if (sortedGroups.includes("ИТ24-11")) {
+          setSelectedGroup("ИТ24-11");
+          setDisplayedGroup("ИТ24-11");
         }
+
         setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error("Ошибка при загрузке JSON:", error);
+      } catch (error) {
+        console.error("Ошибка при загрузке данных:", error);
         setIsLoading(false);
-      });
+      }
+    };
+
+    loadData();
+
     if (window.innerWidth <= 768) {
       setIsMobileSidebarVisible(true);
     }
-
   }, [setIsMobileSidebarVisible]);
 
   useEffect(() => {
@@ -118,28 +137,12 @@ const MainContent = ({ searchQuery, isMobileSidebarVisible, setIsMobileSidebarVi
         setIsTransitioning(false);
       }, 100);
     }
-    setIframeUrl(null);
-    setIsFullscreen(false);
   };
   const handleMobileSidebarClose = () => setIsMobileSidebarVisible(false);
   const handleOverlayClick = (e) => {
     if (e.target.classList.contains("mobileSidebarOverlay")) {
       handleMobileSidebarClose();
     }
-  };
-
-  const handleCardClick = (url) => setIframeUrl(url);
-  const handleBackClick = () => {
-    setIframeUrl(null);
-    setIsFullscreen(false);
-  };
-  const handleFullscreenClick = () => setIsFullscreen(!isFullscreen);
-
-  const formatUrl = (url) => {
-    if (!url) return "";
-    if (url.startsWith("http://") || url.startsWith("https://")) return url;
-    if (url.startsWith("//")) return "https:" + url;
-    return `https://${url}`;
   };
 
   const filteredUsers =
@@ -187,7 +190,7 @@ const MainContent = ({ searchQuery, isMobileSidebarVisible, setIsMobileSidebarVi
                   }`}
                   onClick={() => handleGroupClick(group)}
                 >
-                  ИТ {group}
+                  {group}
                 </button>
                 {group !== groups[groups.length - 1] &&
                   group.split("-")[0] !== groups[index + 1]?.split("-")[0] && (
@@ -221,31 +224,13 @@ const MainContent = ({ searchQuery, isMobileSidebarVisible, setIsMobileSidebarVi
             <Loader type="spinner" />
           </div>
         )}
-        {iframeUrl ? (
-          <div className={`${styles.iframeContainer} ${isFullscreen ? styles.fullscreen : ""}`}>
-            <div className={styles.iframeControls}>
-              <button className={styles.backButton} onClick={handleBackClick}>
-                Назад
-              </button>
-              <button className={styles.fullscreenButton} onClick={handleFullscreenClick}>
-                {isFullscreen ? "Свернуть" : "На весь экран"}
-              </button>
-            </div>
-            <iframe
-              src={iframeUrl}
-              className={styles.iframe}
-              title="Содержимое"
-              style={{ width: "100%", height: isFullscreen ? "100vh" : "80vh", border: "none" }}
-            />
-          </div>
-        ) : selectedGroup || searchQuery ? (
+        {selectedGroup || searchQuery ? (
           filteredUsers.length > 0 ? (
             <div className={`${styles.gridContainer} ${isTransitioning ? styles.fadeOut : ""}`}>
               {filteredUsers.map((user) => (
                 <StudentCard
                   key={user.id}
                   user={user}
-                  onClick={user.url ? () => handleCardClick(formatUrl(user.url)) : undefined}
                 />
               ))}
             </div>
@@ -295,7 +280,7 @@ const MainContent = ({ searchQuery, isMobileSidebarVisible, setIsMobileSidebarVi
                         handleMobileSidebarClose();
                       }}
                   >
-                    ИТ {group}
+                    {group}
                   </button>
                   {group !== groups[groups.length - 1] &&
                       group.split("-")[0] !== groups[index + 1]?.split("-")[0] && (
