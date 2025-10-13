@@ -1,0 +1,26 @@
+.file-icon {
+  display: inline-block;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.file-icon.local-icon {
+  object-fit: contain;
+}
+
+/* Folder icon styling */
+.folder-icon {
+  color: #FDB462;
+}
+
+/* Icon hover effects */
+.repo-item-card:hover .file-icon {
+  transform: scale(1.1);
+}
+
+/* Ensure icons are centered */
+.repo-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

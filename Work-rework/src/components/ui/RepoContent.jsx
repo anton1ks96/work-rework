@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { fetchRepoContents } from '../../services/api';
 import Loader from './Loader';
+import FileIcon from './FileIcon';
 import './repo-content.css';
 
 const RepoContent = ({ studentId, studentName, onBack }) => {
@@ -56,28 +57,6 @@ const RepoContent = ({ studentId, studentName, onBack }) => {
     }
   };
 
-  const getFileIcon = (type, name) => {
-    if (type === 'dir') return '📁';
-    const ext = name.split('.').pop().toLowerCase();
-    const icons = {
-      'js': '📜',
-      'jsx': '⚛️',
-      'ts': '📘',
-      'tsx': '⚛️',
-      'css': '🎨',
-      'html': '🌐',
-      'json': '📋',
-      'md': '📝',
-      'py': '🐍',
-      'java': '☕',
-      'png': '🖼️',
-      'jpg': '🖼️',
-      'jpeg': '🖼️',
-      'gif': '🖼️',
-      'svg': '🖼️',
-    };
-    return icons[ext] || '📄';
-  };
 
   return (
     <div className="repo-content-container">
@@ -122,7 +101,9 @@ const RepoContent = ({ studentId, studentName, onBack }) => {
                 className={`repo-item-card ${item.type === 'dir' ? 'clickable' : ''}`}
                 onClick={() => handleItemClick(item)}
               >
-                <div className="repo-item-icon">{getFileIcon(item.type, item.name)}</div>
+                <div className="repo-item-icon">
+                  <FileIcon type={item.type} name={item.name} size={40} />
+                </div>
                 <div className="repo-item-name">{item.name}</div>
                 {item.type === 'dir' && <div className="repo-item-badge">Папка</div>}
               </div>
