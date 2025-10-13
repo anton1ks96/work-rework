@@ -1,6 +1,0 @@
-git clone http://git.students.it-college.ru:8080/git/i24s0027/Work.git
-git add .
-git commit -m "123"
-git push
-git pull
-git status

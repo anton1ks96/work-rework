@@ -1,6 +1,0 @@
-git clone
-git add .
-got commit -m "123"
-git push
-git pull
-git status

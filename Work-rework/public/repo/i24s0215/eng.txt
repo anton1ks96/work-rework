@@ -1,6 +1,0 @@
-git clone
-git add .
-git commit -m "gg"
-git push
-git pull
-git status

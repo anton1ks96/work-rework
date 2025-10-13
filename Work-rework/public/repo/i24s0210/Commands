@@ -1,5 +1,0 @@
-git add .
-git commit -m "тут должен быть комментарий"
-git push 
-git pull
-git status

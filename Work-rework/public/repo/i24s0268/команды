@@ -1,5 +1,0 @@
-git add .
-git cjmmit -m "123"
-git push
-git pull
-git status

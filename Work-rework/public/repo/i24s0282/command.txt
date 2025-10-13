@@ -1,6 +1,0 @@
-git clone /* Link */
-git add . /* The Root Folder */
-gid commit -m "Comment"
-git push
-git pull
-git status
