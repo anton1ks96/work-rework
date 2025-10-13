@@ -1,0 +1,202 @@
+.repo-content-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.repo-content-header {
+  padding: 24px;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--panel-bg);
+  border-radius: 12px 12px 0 0;
+}
+
+.repo-content-title-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.repo-back-to-students-btn {
+  padding: 10px 20px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.repo-back-to-students-btn:hover {
+  opacity: 0.8;
+}
+
+.repo-content-title h2 {
+  margin: 0;
+  font-size: 24px;
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.repo-content-title p {
+  margin: 4px 0 0 0;
+  font-size: 14px;
+  color: var(--text-secondary-color);
+}
+
+.repo-content-navigation {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 12px;
+  background-color: var(--secondary-bg-color);
+  border-radius: 8px;
+}
+
+.repo-back-btn {
+  padding: 8px 16px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.repo-back-btn:hover {
+  opacity: 0.8;
+}
+
+.repo-current-path {
+  flex: 1;
+  font-size: 14px;
+  color: var(--text-secondary-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.repo-content-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.repo-content-loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.repo-content-error {
+  text-align: center;
+  padding: 40px;
+  color: var(--error-color);
+  font-size: 16px;
+}
+
+.repo-content-empty {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-secondary-color);
+  font-size: 16px;
+}
+
+.repo-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.repo-item-card {
+  background-color: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.repo-item-card.clickable {
+  cursor: pointer;
+}
+
+.repo-item-card.clickable:hover {
+  background-color: var(--hover-bg-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(138, 43, 226, 0.15);
+}
+
+.repo-item-icon {
+  font-size: 48px;
+}
+
+.repo-item-name {
+  font-size: 14px;
+  color: var(--text-color);
+  text-align: center;
+  word-break: break-word;
+  width: 100%;
+}
+
+.repo-item-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: var(--primary-color);
+  color: white;
+  font-size: 10px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .repo-content-header {
+    padding: 16px;
+  }
+
+  .repo-content-title h2 {
+    font-size: 20px;
+  }
+
+  .repo-content-body {
+    padding: 16px;
+  }
+
+  .repo-items-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  .repo-item-card {
+    padding: 16px;
+  }
+
+  .repo-item-icon {
+    font-size: 36px;
+  }
+}

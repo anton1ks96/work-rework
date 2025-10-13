@@ -3,10 +3,10 @@ import PropTypes from 'prop-types';
 import Loader from './Loader';
 import './student-card.css';
 
-const StudentCard = ({ user }) => {
+const StudentCard = ({ user, onClick }) => {
   const hasPhoto = Boolean(user.avatar_path && user.avatar_path.trim());
-  const isGold = user.id === 'i24s0024' || user.id === 'i24s0291';
-  const [loading, setLoading] = useState(hasPhoto); // only load if real photo
+  const isGold = user.id === 'i24s0024' || user.id === 'i24s0291' || user.id === 'i24s0002';
+  const [loading, setLoading] = useState(hasPhoto);
 
   useEffect(() => { if (!hasPhoto) setLoading(false); }, [hasPhoto]);
 
@@ -14,7 +14,9 @@ const StudentCard = ({ user }) => {
   const handleError = (e) => { e.target.style.display = 'none'; setLoading(false); };
 
   const handleClick = () => {
-    alert('В работе, скоро будет');
+    if (onClick) {
+      onClick(user);
+    }
   };
 
   return (
@@ -37,6 +39,7 @@ const StudentCard = ({ user }) => {
 
 StudentCard.propTypes = {
   user: PropTypes.object.isRequired,
+  onClick: PropTypes.func,
 };
 
 export default StudentCard;
