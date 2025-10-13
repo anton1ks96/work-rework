@@ -1,4 +1,0 @@
-git clome ссылка
-git add .
-git commit -m "Hello ms"
-git push

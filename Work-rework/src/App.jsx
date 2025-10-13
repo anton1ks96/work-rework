@@ -31,6 +31,7 @@ const App = () => {
             setSearchQuery={setSearchQuery}
             isMobileSidebarVisible={isMobileSidebarVisible}
             setIsMobileSidebarVisible={setIsMobileSidebarVisible}
+            setClearTrigger={setClearTrigger}
         />
       {/* Desktop overlay: appears while focusing search with short query; clickable to dismiss */}
       {!isMobile && isSearchFocused && searchQuery.length < 2 && (

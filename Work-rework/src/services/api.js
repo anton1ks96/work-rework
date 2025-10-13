@@ -157,3 +157,20 @@ export const fetchRepoContents = async (user_id, path = "") => {
         throw error;
     }
 };
+
+/**
+ * Generates URL for opening HTML file in a new tab
+ * The backend automatically inserts <base> tag to resolve relative paths
+ * @param {string} userId - User ID (e.g., "i24s0002")
+ * @param {string} path - Path to HTML file in repository
+ * @returns {string} Full URL to open HTML file
+ * @example
+ * getHtmlUrl('student123', 'index.html')
+ * // => '/api/repos/student123/Work/branches/main/html/index.html'
+ *
+ * getHtmlUrl('student123', '!__HISTORY_NEW/index.html')
+ * // => '/api/repos/student123/Work/branches/main/html/!__HISTORY_NEW/index.html'
+ */
+export const getHtmlUrl = (userId, path) => {
+    return `${API_BASE_URL}/api/repos/${userId}/Work/branches/main/html/${path}`;
+};

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { fetchRepoContents } from '../../services/api';
+import { fetchRepoContents, getHtmlUrl } from '../../services/api';
 import Loader from './Loader';
 import FileIcon from './FileIcon';
 import './repo-content.css';
@@ -45,6 +45,10 @@ const RepoContent = ({ studentId, studentName, onBack }) => {
     if (item.type === 'dir') {
       setPathHistory([...pathHistory, currentPath]);
       setCurrentPath(item.path);
+    } else if (item.type === 'file' && item.name.toLowerCase().endsWith('.html')) {
+      // Open HTML file in new tab via API endpoint
+      const htmlUrl = getHtmlUrl(studentId, item.path);
+      window.open(htmlUrl, '_blank');
     }
   };
 
@@ -95,19 +99,25 @@ const RepoContent = ({ studentId, studentName, onBack }) => {
           <div className="repo-content-empty">Папка пуста</div>
         ) : (
           <div className="repo-items-grid">
-            {contents.map((item, index) => (
-              <div
-                key={index}
-                className={`repo-item-card ${item.type === 'dir' ? 'clickable' : ''}`}
-                onClick={() => handleItemClick(item)}
-              >
-                <div className="repo-item-icon">
-                  <FileIcon type={item.type} name={item.name} size={40} />
+            {contents.map((item, index) => {
+              const isHtmlFile = item.type === 'file' && item.name.toLowerCase().endsWith('.html');
+              const isClickable = item.type === 'dir' || isHtmlFile;
+
+              return (
+                <div
+                  key={index}
+                  className={`repo-item-card ${isClickable ? 'clickable' : ''}`}
+                  onClick={() => handleItemClick(item)}
+                >
+                  <div className="repo-item-icon">
+                    <FileIcon type={item.type} name={item.name} size={40} />
+                  </div>
+                  <div className="repo-item-name">{item.name}</div>
+                  {item.type === 'dir' && <div className="repo-item-badge">Папка</div>}
+                  {isHtmlFile && <div className="repo-item-badge">Открыть</div>}
                 </div>
-                <div className="repo-item-name">{item.name}</div>
-                {item.type === 'dir' && <div className="repo-item-badge">Папка</div>}
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

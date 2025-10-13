@@ -13,6 +13,7 @@ const MainContent = ({
     isMobileSidebarVisible,
     setIsMobileSidebarVisible,
     setSearchQuery,
+    setClearTrigger,
 }) => {
     const [users, setUsers] = useState([]);
     const [groups, setGroups] = useState([]);
@@ -173,6 +174,13 @@ const MainContent = ({
 
     const handleGroupClick = (group) => {
         setSelectedStudent(null);
+
+        setSearchQuery("");
+        setSearchInput("");
+        setSearchResults([]);
+        setSearchValidation(null);
+        setClearTrigger(c => c + 1);
+
         if (group === selectedGroup) {
             setSelectedGroup(null);
             setIsTransitioning(true);
@@ -462,4 +470,5 @@ MainContent.propTypes = {
     setSearchQuery: PropTypes.func.isRequired,
     isMobileSidebarVisible: PropTypes.bool.isRequired,
     setIsMobileSidebarVisible: PropTypes.func.isRequired,
+    setClearTrigger: PropTypes.func.isRequired,
 };
