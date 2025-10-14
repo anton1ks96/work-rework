@@ -5,7 +5,7 @@ import Loader from './Loader';
 import FileIcon from './FileIcon';
 import './repo-content.css';
 
-const RepoContent = ({ studentId, studentName, onBack }) => {
+const RepoContent = ({ studentId, studentName, studentAvatar, onBack }) => {
   const [contents, setContents] = useState([]);
   const [currentPath, setCurrentPath] = useState('');
   const [pathHistory, setPathHistory] = useState([]);
@@ -62,64 +62,81 @@ const RepoContent = ({ studentId, studentName, onBack }) => {
   };
 
 
+  const hasPhoto = Boolean(studentAvatar && studentAvatar.trim());
+
   return (
-    <div className="repo-content-container">
-      <div className="repo-content-header">
-        <div className="repo-content-title-row">
-          {onBack && (
-            <button className="repo-back-to-students-btn" onClick={onBack}>
-              ← К списку студентов
-            </button>
-          )}
-          <div className="repo-content-title">
-            <h2>Репозиторий: {studentId}</h2>
-            <p>{studentName}</p>
-          </div>
-        </div>
-        <div className="repo-content-navigation">
-          {pathHistory.length > 0 && (
-            <button className="repo-back-btn" onClick={handleBack}>
-              ← Назад к папке
-            </button>
-          )}
-          <div className="repo-current-path">
-            {currentPath || 'Корневая директория'}
-          </div>
+    <div className="repo-content-wrapper">
+      {/* Student Photo Sidebar */}
+      <div className="repo-student-sidebar">
+        {hasPhoto ? (
+          <img src={studentAvatar} alt={studentName} className="repo-student-photo" />
+        ) : (
+          <div className="repo-no-photo">Нет фото</div>
+        )}
+        <div className="repo-student-info">
+          <div className="repo-student-name">{studentName}</div>
+          <div className="repo-student-id">{studentId}</div>
         </div>
       </div>
 
-      <div className="repo-content-body">
-        {isLoading ? (
-          <div className="repo-content-loader">
-            <Loader type="spinner" />
+      {/* Main Content Area */}
+      <div className="repo-content-container">
+        <div className="repo-content-header">
+          <div className="repo-content-title-row">
+            {onBack && (
+              <button className="repo-back-to-students-btn" onClick={onBack} title="К списку студентов">
+                ←
+              </button>
+            )}
+            <div className="repo-content-title">
+              <h2>Репозиторий</h2>
+            </div>
           </div>
-        ) : error ? (
-          <div className="repo-content-error">{error}</div>
-        ) : contents.length === 0 ? (
-          <div className="repo-content-empty">Папка пуста</div>
-        ) : (
-          <div className="repo-items-grid">
-            {contents.map((item, index) => {
-              const isHtmlFile = item.type === 'file' && item.name.toLowerCase().endsWith('.html');
-              const isClickable = item.type === 'dir' || isHtmlFile;
+          <div className="repo-content-navigation">
+            {pathHistory.length > 0 && (
+              <button className="repo-back-btn" onClick={handleBack}>
+                ← Назад к папке
+              </button>
+            )}
+            <div className="repo-current-path">
+              {currentPath || 'Корневая директория'}
+            </div>
+          </div>
+        </div>
 
-              return (
-                <div
-                  key={index}
-                  className={`repo-item-card ${isClickable ? 'clickable' : ''}`}
-                  onClick={() => handleItemClick(item)}
-                >
-                  <div className="repo-item-icon">
-                    <FileIcon type={item.type} name={item.name} size={40} />
+        <div className="repo-content-body">
+          {isLoading ? (
+            <div className="repo-content-loader">
+              <Loader type="spinner" />
+            </div>
+          ) : error ? (
+            <div className="repo-content-error">{error}</div>
+          ) : contents.length === 0 ? (
+            <div className="repo-content-empty">Папка пуста</div>
+          ) : (
+            <div className="repo-items-grid">
+              {contents.map((item, index) => {
+                const isHtmlFile = item.type === 'file' && item.name.toLowerCase().endsWith('.html');
+                const isClickable = item.type === 'dir' || isHtmlFile;
+
+                return (
+                  <div
+                    key={index}
+                    className={`repo-item-card ${isClickable ? 'clickable' : ''}`}
+                    onClick={() => handleItemClick(item)}
+                  >
+                    <div className="repo-item-icon">
+                      <FileIcon type={item.type} name={item.name} size={40} />
+                    </div>
+                    <div className="repo-item-name">{item.name}</div>
+                    {item.type === 'dir' && <div className="repo-item-badge">Папка</div>}
+                    {isHtmlFile && <div className="repo-item-badge">Открыть</div>}
                   </div>
-                  <div className="repo-item-name">{item.name}</div>
-                  {item.type === 'dir' && <div className="repo-item-badge">Папка</div>}
-                  {isHtmlFile && <div className="repo-item-badge">Открыть</div>}
-                </div>
-              );
-            })}
-          </div>
-        )}
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -128,6 +145,7 @@ const RepoContent = ({ studentId, studentName, onBack }) => {
 RepoContent.propTypes = {
   studentId: PropTypes.string.isRequired,
   studentName: PropTypes.string.isRequired,
+  studentAvatar: PropTypes.string,
   onBack: PropTypes.func,
 };
 

@@ -288,6 +288,7 @@ const MainContent = ({
                     <RepoContent
                         studentId={selectedStudent.id}
                         studentName={`${selectedStudent.last_name} ${selectedStudent.first_name}`}
+                        studentAvatar={selectedStudent.avatar_path}
                         onBack={handleBackToStudents}
                     />
                 ) : selectedGroup || searchQuery ? (

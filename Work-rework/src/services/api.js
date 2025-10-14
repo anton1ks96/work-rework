@@ -130,7 +130,9 @@ export const searchStudents = async (query) => {
 export const fetchRepoContents = async (user_id, path = "") => {
     try {
         const endpoint = path
-            ? `${API_BASE_URL}/api/v1/repos/${user_id}/contents?path=${encodeURIComponent(path)}`
+            ? `${API_BASE_URL}/api/v1/repos/${user_id}/contents?path=${encodeURIComponent(
+                  path
+              )}`
             : `${API_BASE_URL}/api/v1/repos/${user_id}/contents`;
 
         const response = await fetch(endpoint, {

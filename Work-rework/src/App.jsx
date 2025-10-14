@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Header from "./components/header.jsx";
 import SideBar from "./components/sidebar.jsx";
 import MainContent from "./components/MainContent.jsx";
+import Footer from "./components/Footer.jsx";
 
 const App = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -17,7 +18,7 @@ const App = () => {
   }, []);
 
     return (
-    <div>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <Header
           onSearch={setSearchQuery}
           onOpenSidebar={() => setIsMobileSidebarVisible(true)}
@@ -52,6 +53,7 @@ const App = () => {
         />
       )}
       <SideBar />
+      <Footer />
     </div>
   );
 };

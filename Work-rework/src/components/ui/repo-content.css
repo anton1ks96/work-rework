@@ -1,11 +1,3 @@
-.repo-content-container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  animation: fadeIn 0.3s ease-in-out;
-}
-
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -13,6 +5,74 @@
   to {
     opacity: 1;
   }
+}
+
+.repo-content-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  gap: 24px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.repo-student-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  background-color: var(--panel-bg);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  align-self: flex-start;
+  height: fit-content;
+}
+
+.repo-student-photo {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.repo-no-photo {
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--secondary-bg-color);
+  border-radius: 12px;
+  color: var(--text-secondary-color);
+  font-size: 16px;
+}
+
+.repo-student-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+}
+
+.repo-student-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-color);
+  word-wrap: break-word;
+}
+
+.repo-student-id {
+  font-size: 14px;
+  color: var(--text-secondary-color);
+}
+
+.repo-content-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .repo-content-header {
@@ -30,20 +90,25 @@
 }
 
 .repo-back-to-students-btn {
-  padding: 10px 20px;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  color: var(--text-secondary-color);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: opacity 0.2s;
+  font-size: 18px;
+  transition: all 0.2s;
   white-space: nowrap;
 }
 
 .repo-back-to-students-btn:hover {
-  opacity: 0.8;
+  background-color: var(--hover-bg-color);
+  color: var(--text-color);
+  border-color: var(--primary-color);
 }
 
 .repo-content-title h2 {
@@ -175,6 +240,30 @@
 }
 
 @media (max-width: 768px) {
+  .repo-content-wrapper {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .repo-student-sidebar {
+    width: 100%;
+    flex-direction: row;
+    padding: 16px;
+  }
+
+  .repo-student-photo,
+  .repo-no-photo {
+    width: 80px;
+    height: 80px;
+    aspect-ratio: 1;
+  }
+
+  .repo-student-info {
+    flex: 1;
+    text-align: left;
+    justify-content: center;
+  }
+
   .repo-content-header {
     padding: 16px;
   }

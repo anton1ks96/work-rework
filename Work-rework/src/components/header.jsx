@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import logo from "../assets/png_images/logo.png";
+import logoLight from "../assets/png_images/logo_light.png";
+import logoDark from "../assets/png_images/logo_dark.png";
 import ThemeToggle from './theme/ThemeToggle';
+import { useTheme } from './theme/useTheme';
 
 // Added clearTrigger (number) to allow external clearing (e.g., clicking overlay)
 // Optional onOpenSidebar preserved for potential future mobile sidebar button.
 const Header = ({ onSearch, onSearchFocus, onSearchBlur, clearTrigger }) => {
+  const { theme } = useTheme();
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -41,7 +44,7 @@ const Header = ({ onSearch, onSearchFocus, onSearchBlur, clearTrigger }) => {
     <header className={`header ${isScrolled ? "scrolled" : ""}`}>
       <div className="header-content">
         <div className="logo">
-          <img src={logo} alt="logo" />
+          <img src={theme === 'dark' ? logoDark : logoLight} alt="logo" />
         </div>
         {!isMobile && (
           <div className="top-bar">
