@@ -130,10 +130,10 @@ export const searchStudents = async (query) => {
 export const fetchRepoContents = async (user_id, path = "") => {
     try {
         const endpoint = path
-            ? `${API_BASE_URL}/api/v1/repos/${user_id}/contents?path=${encodeURIComponent(
+            ? `${API_BASE_URL}/api/v1/repos/${user_id}/Work/contents?path=${encodeURIComponent(
                   path
               )}`
-            : `${API_BASE_URL}/api/v1/repos/${user_id}/contents`;
+            : `${API_BASE_URL}/api/v1/repos/${user_id}/Work/contents`;
 
         const response = await fetch(endpoint, {
             method: "GET",
@@ -154,6 +154,45 @@ export const fetchRepoContents = async (user_id, path = "") => {
     } catch (error) {
         console.error(
             `Error fetching repository contents for ${user_id}:`,
+            error
+        );
+        throw error;
+    }
+};
+
+/**
+ * Fetches commits from a repository
+ * @param {string} userId - User ID (e.g., "i24s0002")
+ * @param {number} page - Page number (default: 1)
+ * @param {number} perPage - Items per page (default: 20)
+ * @returns {Promise<Object>} Object with count and commits array
+ * @example
+ * fetchCommits('i24s0002', 1, 20)
+ * // => { count: 20, commits: [...] }
+ */
+export const fetchCommits = async (userId, page = 1, perPage = 20) => {
+    try {
+        const endpoint = `${API_BASE_URL}/api/v1/repos/${userId}/Work/commits?page=${page}&per_page=${perPage}`;
+
+        const response = await fetch(endpoint, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(
+                `Failed to fetch commits: ${response.status}`
+            );
+        }
+
+        const data = await response.json();
+
+        return data;
+    } catch (error) {
+        console.error(
+            `Error fetching commits for ${userId}:`,
             error
         );
         throw error;
