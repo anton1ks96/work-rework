@@ -1,5 +1,5 @@
 const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:8070";
+    import.meta.env.API_BASE_URL || "http://localhost:8070";
 
 /**
  * Fetches all groups from the backend
@@ -127,12 +127,10 @@ export const searchStudents = async (query) => {
 // PARAMS: user_id (e.g., "i24s0002"), path (optional)
 // RETURNS: array of repo content items
 
-export const fetchRepoContents = async (user_id, path = "") => {
+export const fetchRepoContents = async (user_id, path = "", signal = null) => {
     try {
-        const endpoint = path
-            ? `${API_BASE_URL}/api/v1/repos/${user_id}/Work/contents?path=${encodeURIComponent(
-                  path
-              )}`
+        const endpoint = path && path.trim()
+            ? `${API_BASE_URL}/api/v1/repos/${user_id}/Work/contents?path=${encodeURIComponent(path)}`
             : `${API_BASE_URL}/api/v1/repos/${user_id}/Work/contents`;
 
         const response = await fetch(endpoint, {
@@ -140,18 +138,33 @@ export const fetchRepoContents = async (user_id, path = "") => {
             headers: {
                 "Content-Type": "application/json",
             },
+            signal: signal,
         });
 
         if (!response.ok) {
-            throw new Error(
-                `Failed to fetch repository contents: ${response.status}`
-            );
+            let errorMessage = `HTTP ${response.status}`;
+            try {
+                const errorData = await response.json();
+                if (errorData.error) {
+                    errorMessage = errorData.error;
+                } else if (errorData.message) {
+                    errorMessage = errorData.message;
+                }
+            } catch (e) {
+                errorMessage = response.statusText || errorMessage;
+            }
+
+            const error = new Error(errorMessage);
+            error.status = response.status;
+            throw error;
         }
 
         const data = await response.json();
-
         return data;
     } catch (error) {
+        if (error.name === 'AbortError') {
+            throw error;
+        }
         console.error(
             `Error fetching repository contents for ${user_id}:`,
             error
@@ -206,12 +219,35 @@ export const fetchCommits = async (userId, page = 1, perPage = 20) => {
  * @param {string} path - Path to HTML file in repository
  * @returns {string} Full URL to open HTML file
  * @example
- * getHtmlUrl('student123', 'index.html')
- * // => '/api/repos/student123/Work/branches/main/html/index.html'
+ * getHtmlUrl('i24s0002', 'index.html')
+ * // => 'http://localhost:8070/api/v1/repos/i24s0002/Work/branches/main/html/index.html'
  *
- * getHtmlUrl('student123', '!__HISTORY_NEW/index.html')
- * // => '/api/repos/student123/Work/branches/main/html/!__HISTORY_NEW/index.html'
+ * getHtmlUrl('i24s0002', '!__HISTORY_NEW/index.html')
+ * // => 'http://localhost:8070/api/v1/repos/i24s0002/Work/branches/main/html/!__HISTORY_NEW/index.html'
  */
 export const getHtmlUrl = (userId, path) => {
-    return `${API_BASE_URL}/api/repos/${userId}/Work/branches/main/html/${path}`;
+    return `${API_BASE_URL}/api/v1/repos/${userId}/Work/branches/main/html/${path}`;
+};
+
+/**
+ * Generates URL for downloading repository or folder as ZIP archive
+ * @param {string} userId - User ID (e.g., "i24s0002")
+ * @param {string} path - Path to folder (empty for whole repository)
+ * @param {string} branch - Branch name (default: "main")
+ * @returns {string} Full URL to download ZIP archive
+ * @example
+ * getArchiveUrl('i24s0002')
+ * // => 'http://git.students.it-college.ru:8080/i24s0002/Work/archive/main.zip'
+ *
+ * getArchiveUrl('i24s0002', 'diskretka')
+ * // => 'http://git.students.it-college.ru:8080/i24s0002/Work/archive/diskretka/main.zip'
+ */
+export const getArchiveUrl = (userId, path = '', branch = 'main') => {
+    const baseUrl = 'http://git.students.it-college.ru:8080';
+    if (!path) {
+        // Download entire repository
+        return `${baseUrl}/${userId}/Work/archive/${branch}.zip`;
+    }
+    // Download specific folder
+    return `${baseUrl}/${userId}/Work/archive/${path}/${branch}.zip`;
 };

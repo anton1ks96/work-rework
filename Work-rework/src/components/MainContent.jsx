@@ -31,6 +31,7 @@ const MainContent = ({
     const [isCompactSearchOpen, setIsCompactSearchOpen] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
     const [searchValidation, setSearchValidation] = useState(null);
+    const [hasError, setHasError] = useState(false);
 
     useEffect(() => {
         const loadGroups = async () => {
@@ -70,20 +71,25 @@ const MainContent = ({
     useEffect(() => {
         if (!displayedGroup) {
             setUsers([]);
+            setHasError(false);
             return;
         }
 
         const loadStudents = async () => {
             setIsContentLoading(true);
+            setHasError(false);
+
             try {
                 const studentsData = await fetchStudents(displayedGroup);
                 setUsers(studentsData);
+                setHasError(false);
             } catch (error) {
                 console.error(
                     `Ошибка при загрузке студентов группы ${displayedGroup}:`,
                     error
                 );
                 setUsers([]);
+                setHasError(true);
             } finally {
                 setIsContentLoading(false);
             }
@@ -292,7 +298,11 @@ const MainContent = ({
                         onBack={handleBackToStudents}
                     />
                 ) : selectedGroup || searchQuery ? (
-                    filteredUsers.length > 0 ? (
+                    hasError ? (
+                        <div className={styles.emptyState}>
+                            Ошибка загрузки данных. Проверьте соединение с сервером.
+                        </div>
+                    ) : filteredUsers.length > 0 ? (
                         <div
                             className={`${styles.gridContainer} ${
                                 isTransitioning ? styles.fadeOut : ""

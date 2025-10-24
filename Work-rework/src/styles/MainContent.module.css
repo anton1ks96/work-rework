@@ -85,13 +85,13 @@ body {
     color: var(--text-color);
 }
 
-.groupButton:hover {
+.groupButton:hover:not(.groupButtonActive) {
     background: var(--hover-bg-color);
 }
 
 .groupButton:active {
     transform: scale(0.97);
-    box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.3);
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.15);
 }
 
 .groupButtonActive {
@@ -101,6 +101,15 @@ body {
 
 :root .groupButtonActive {
     color: #ffffff;
+}
+
+.groupButtonActive:hover {
+    background: var(--accent-color);
+    opacity: 0.95;
+}
+
+.groupButtonActive:active {
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
 .dividerIndicator {
@@ -130,7 +139,7 @@ body {
     position: fixed;
     top: 0;
     left: 170px;
-    height: 70vh;
+    height: 100vh;
     width: 1px;
     background-color: var(--divider-color);
     margin: 0;

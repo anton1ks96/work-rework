@@ -1,9 +1,26 @@
 import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { fetchRepoContents, getHtmlUrl, fetchCommits } from '../../services/api';
+import { fetchRepoContents, getHtmlUrl, getArchiveUrl, fetchCommits } from '../../services/api';
 import Loader from './Loader';
 import FileIcon from './FileIcon';
 import './repo-content.css';
+
+const DownloadIcon = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 1024 1024"
+    className={className}
+  >
+    <path
+      fill="currentColor"
+      d="M505.7 661a8 8 0 0 0 12.6 0l112-141.7c4.1-5.2.4-12.9-6.3-12.9h-74.1V168c0-4.4-3.6-8-8-8h-60c-4.4 0-8 3.6-8 8v338.3H400c-6.7 0-10.4 7.7-6.3 12.9zM878 626h-60c-4.4 0-8 3.6-8 8v154H214V634c0-4.4-3.6-8-8-8h-60c-4.4 0-8 3.6-8 8v198c0 17.7 14.3 32 32 32h684c17.7 0 32-14.3 32-32V634c0-4.4-3.6-8-8-8"
+    />
+  </svg>
+);
+
+DownloadIcon.propTypes = {
+  className: PropTypes.string,
+};
 
 const RepoContent = ({ studentId, studentName, studentAvatar, onBack }) => {
   const [contents, setContents] = useState([]);
@@ -19,24 +36,55 @@ const RepoContent = ({ studentId, studentName, studentAvatar, onBack }) => {
   const [perPage, setPerPage] = useState(15);
   const [hasNext, setHasNext] = useState(false);
   const [expandedCommits, setExpandedCommits] = useState(new Set());
-  const loadingRef = useRef(false);
+  const abortControllerRef = useRef(null);
   const commitsLoadingRef = useRef(false);
 
   useEffect(() => {
-    if (viewMode === 'files' && !loadingRef.current) {
+    if (viewMode === 'files') {
       loadContents(currentPath);
     }
-  }, [currentPath, studentId]);
+
+    // Cleanup function - only abort on component unmount, not on path change
+    return () => {
+      // Don't abort here - let loadContents handle it
+    };
+  }, [currentPath, studentId, viewMode]);
 
   const loadContents = async (path) => {
-    if (loadingRef.current) return; // Prevent duplicate requests
+    // Cancel previous request only if it exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
 
-    loadingRef.current = true;
+    // Create new controller for this request
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     setIsLoading(true);
     setError(null);
-    setContents([]); // Clear old contents before loading new
+
+    // Set timeout for large repositories (45 seconds)
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, 45000);
+
     try {
-      const data = await fetchRepoContents(studentId, path);
+      const data = await fetchRepoContents(studentId, path, controller.signal);
+
+      clearTimeout(timeoutId);
+
+      // Check if this specific request was aborted (not just any request)
+      if (controller.signal.aborted) {
+        console.log('Request was aborted for path:', path);
+        return;
+      }
+
+      // Check if we're still working with the same controller
+      if (abortControllerRef.current !== controller) {
+        console.log('Controller changed, ignoring results for path:', path);
+        return;
+      }
+
       if (Array.isArray(data)) {
         setContents(data);
       } else if (data && Array.isArray(data.items)) {
@@ -51,12 +99,39 @@ const RepoContent = ({ studentId, studentName, studentAvatar, onBack }) => {
         console.error('Unexpected data format:', data);
         setContents([]);
       }
-    } catch (err) {
-      setError('Не удалось загрузить содержимое репозитория');
-      console.error(err);
-    } finally {
+
       setIsLoading(false);
-      loadingRef.current = false;
+    } catch (err) {
+      clearTimeout(timeoutId);
+
+      // Only show error if this controller is still active
+      if (abortControllerRef.current !== controller) {
+        console.log('Controller changed during error, ignoring error for path:', path);
+        return;
+      }
+
+      if (err.name === 'AbortError') {
+        // Only show timeout error if the request took long time (not cancelled by user navigation)
+        setError('Запрос прервался. Попробуйте еще раз.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Handle specific error codes
+      if (err.status === 400) {
+        setError('Ошибка запроса: неверный формат данных или путь');
+      } else if (err.status === 404) {
+        setError('Репозиторий или путь не найдены');
+      } else if (err.status === 500) {
+        setError('Ошибка сервера. Попробуйте позже');
+      } else if (err.status === 502 || err.status === 503 || err.status === 504) {
+        setError('Сервер временно недоступен');
+      } else {
+        setError(`Не удалось загрузить содержимое: ${err.message || 'неизвестная ошибка'}`);
+      }
+
+      console.error('Error loading repository contents:', err);
+      setIsLoading(false);
     }
   };
 
@@ -64,10 +139,13 @@ const RepoContent = ({ studentId, studentName, studentAvatar, onBack }) => {
     if (item.type === 'dir') {
       setPathHistory([...pathHistory, currentPath]);
       setCurrentPath(item.path);
-    } else if (item.type === 'file' && item.name.toLowerCase().endsWith('.html')) {
-      // Open HTML file in new tab via API endpoint
-      const htmlUrl = getHtmlUrl(studentId, item.path);
-      window.open(htmlUrl, '_blank');
+    } else if (item.type === 'file') {
+      if (item.name.toLowerCase().endsWith('.html')) {
+        const htmlUrl = getHtmlUrl(studentId, item.path);
+        window.open(htmlUrl, '_blank');
+      } else if (item.download_url) {
+        window.open(item.download_url, '_blank');
+      }
     }
   };
 
@@ -85,7 +163,6 @@ const RepoContent = ({ studentId, studentName, studentAvatar, onBack }) => {
 
     commitsLoadingRef.current = true;
     setCommitsLoading(true);
-    setCommits([]); // Clear commits before loading new ones
     try {
       const data = await fetchCommits(studentId, page, itemsPerPage);
       console.log('API returned commits:', data.commits?.length, 'Page:', data.page);
@@ -162,23 +239,36 @@ const RepoContent = ({ studentId, studentName, studentAvatar, onBack }) => {
             <div className="repo-content-title">
               <h2>{viewMode === 'commits' ? 'История коммитов' : 'Репозиторий'}</h2>
             </div>
-            {viewMode === 'files' ? (
-              <button className="repo-history-btn" onClick={handleHistoryClick} title="История коммитов">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
-                </svg>
-                <span>История</span>
-              </button>
-            ) : (
-              <button className="repo-history-btn" onClick={handleBackToFiles} title="Назад к файлам">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                  <polyline points="9 22 9 12 15 12 15 22"/>
-                </svg>
-                <span>К файлам</span>
-              </button>
-            )}
+            <div className="repo-header-actions">
+              {viewMode === 'files' ? (
+                <>
+                  <a
+                    href={getArchiveUrl(studentId, '')}
+                    className="repo-history-btn"
+                    title="Скачать весь репозиторий как ZIP"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <DownloadIcon className="repo-download-icon" />
+                    <span>Скачать ZIP</span>
+                  </a>
+                  <button className="repo-history-btn" onClick={handleHistoryClick} title="История коммитов">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    <span>История</span>
+                  </button>
+                </>
+              ) : (
+                <button className="repo-history-btn" onClick={handleBackToFiles} title="Назад к файлам">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                  </svg>
+                  <span>К файлам</span>
+                </button>
+              )}
+            </div>
           </div>
           {viewMode === 'files' && (
             <div className="repo-content-navigation">
@@ -211,10 +301,10 @@ const RepoContent = ({ studentId, studentName, studentAvatar, onBack }) => {
                 <div className="repo-list-header-icon"></div>
                 <div className="repo-list-header-name">Название</div>
                 <div className="repo-list-header-date">Дата изменения</div>
+                <div className="repo-list-header-download"></div>
               </div>
               {contents.map((item, index) => {
-                const isHtmlFile = item.type === 'file' && item.name.toLowerCase().endsWith('.html');
-                const isClickable = item.type === 'dir' || isHtmlFile;
+                const isClickable = item.type === 'dir' || item.type === 'file';
 
                 // Format date if available
                 const formatDate = (dateString) => {
@@ -267,6 +357,18 @@ const RepoContent = ({ studentId, studentName, studentAvatar, onBack }) => {
                     </div>
                     <div className="repo-list-item-date">
                       {formatDate(item.modified_date || item.last_modified || item.updated_at)}
+                    </div>
+                    <div className="repo-list-item-download">
+                      {item.type === 'dir' && (
+                        <a
+                          href={getArchiveUrl(studentId, item.path)}
+                          className="repo-download-link"
+                          onClick={(e) => e.stopPropagation()}
+                          title="Скачать папку как ZIP"
+                        >
+                          <DownloadIcon className="repo-download-icon" />
+                        </a>
+                      )}
                     </div>
                   </div>
                 );
