@@ -107,15 +107,6 @@ const MainContent = ({
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    const computeIndicatorTop = (group) => {
-        const button = !isMobile ? groupRefs.current[group] : null;
-        if (button) {
-            const rect = button.getBoundingClientRect();
-            return rect.top + rect.height / 2 - 13;
-        }
-        return 0;
-    };
-
     useEffect(() => {
         if (!searchQuery || searchQuery.length === 0) {
             setSearchResults([]);
@@ -221,8 +212,6 @@ const MainContent = ({
     const filteredUsers =
         searchQuery && searchQuery.length > 0 ? searchResults : users;
 
-    const searchMatchedGroups = [];
-
     const closeCompactSearch = () => setIsCompactSearchOpen(false);
 
     return (
@@ -266,21 +255,6 @@ const MainContent = ({
                             ))}
                         </div>
                     )}
-                    {selectedGroup && (
-                        <div
-                            className={styles.dividerIndicator}
-                            style={{ top: computeIndicatorTop(selectedGroup) }}
-                        />
-                    )}
-                    {searchMatchedGroups
-                        .filter((group) => group !== selectedGroup)
-                        .map((group) => (
-                            <div
-                                key={group}
-                                className={`${styles.dividerIndicator} ${styles.searchFloatingIndicator}`}
-                                style={{ top: computeIndicatorTop(group) }}
-                            />
-                        ))}
                 </div>
             )}
             <div className={styles.divider} />
