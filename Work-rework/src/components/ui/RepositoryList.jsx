@@ -5,60 +5,19 @@ import Loader from './Loader';
 import './repository-list.css';
 
 const RepositoryCard = ({ repository, onClick }) => {
-  const getRepoIcon = (repoName) => {
+  const getRepoColor = (repoName) => {
     const name = repoName.toLowerCase();
 
-    // Определение типа репозитория по имени
+    // Определение цвета репозитория по имени
     if (name.includes('work') || name === 'work' || name.includes('работа')) {
-      return {
-        icon: (
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" className="repo-icon">
-            <rect x="3" y="3" width="18" height="18" rx="2" fill="#8A2BE2"/>
-            <path d="M8 8H16M8 12H14M8 16H12" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
-        ),
-        color: '#8A2BE2'
-      };
+      return '#8A2BE2'; // Фиолетовый для основного репо
     }
 
-    if (name.includes('personal') || name.includes('pet') || name.includes('project')) {
-      return {
-        icon: (
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" className="repo-icon">
-            <rect x="3" y="3" width="18" height="18" rx="2" fill="#FF6B6B"/>
-            <path d="M12 8V12L15 15M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
-        ),
-        color: '#FF6B6B'
-      };
-    }
-
-    if (name.includes('lab') || name.includes('praktika') || name.includes('practice') || name.includes('лаб')) {
-      return {
-        icon: (
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" className="repo-icon">
-            <rect x="3" y="3" width="18" height="18" rx="2" fill="#4ECDC4"/>
-            <path d="M9 3V7M15 3V7M9 7H7C5.89543 7 5 7.89543 5 9V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V9C19 7.89543 18.1046 7 17 7H15M9 7H15" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
-            <circle cx="12" cy="14" r="2" fill="#fff"/>
-          </svg>
-        ),
-        color: '#4ECDC4'
-      };
-    }
-
-    // Default Git icon for unknown repositories
-    return {
-      icon: (
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" className="repo-icon">
-          <rect x="3" y="3" width="18" height="18" rx="2" fill="#64748B"/>
-          <path d="M11.5 7L16.5 12L11.5 17L6.5 12L11.5 7Z" fill="#fff"/>
-        </svg>
-      ),
-      color: '#64748B'
-    };
+    // Серый для всех остальных
+    return '#64748B';
   };
 
-  const { icon, color } = getRepoIcon(repository.name);
+  const color = getRepoColor(repository.name);
 
   return (
     <div
@@ -66,8 +25,15 @@ const RepositoryCard = ({ repository, onClick }) => {
       onClick={onClick}
       style={{ '--repo-color': color }}
     >
-      <div className="repository-card-icon">
-        {icon}
+      <div className="repository-card-icon" style={{ color: color }}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" className="repo-icon">
+          <g fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5">
+            <path d="M4 19V5a2 2 0 0 1 2-2h13.4a.6.6 0 0 1 .6.6v13.114"/>
+            <path strokeLinejoin="round" d="M15 17v5l2.5-1.6L20 22v-5"/>
+            <path d="M6 17h14"/>
+            <path strokeLinejoin="round" d="M6 17a2 2 0 1 0 0 4h5.5"/>
+          </g>
+        </svg>
       </div>
       <div className="repository-card-content">
         <h3 className="repository-card-name">{repository.name}</h3>
