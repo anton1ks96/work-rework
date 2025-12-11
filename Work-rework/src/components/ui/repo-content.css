@@ -89,26 +89,40 @@
   margin-bottom: 16px;
 }
 
-.repo-back-to-students-btn {
-  width: 36px;
-  height: 36px;
+/* Navigation Buttons Group */
+.repo-navigation-buttons {
   display: flex;
+  gap: 8px;
   align-items: center;
-  justify-content: center;
-  background-color: transparent;
-  color: var(--text-secondary-color);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
+}
+
+.repo-back-to-students-btn,
+.repo-back-to-repos-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--accent-color);
+  background: transparent;
+  color: var(--text-color);
   cursor: pointer;
-  font-size: 18px;
-  transition: all 0.2s;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
   white-space: nowrap;
 }
 
-.repo-back-to-students-btn:hover {
-  background-color: var(--hover-bg-color);
-  color: var(--text-color);
-  border-color: var(--primary-color);
+.repo-back-to-students-btn:hover,
+.repo-back-to-repos-btn:hover {
+  background: var(--accent-color);
+  color: #ffffff;
+  transform: translateX(-2px);
+}
+
+.repo-back-to-students-btn svg,
+.repo-back-to-repos-btn svg {
+  flex-shrink: 0;
 }
 
 .repo-content-title h2 {
@@ -116,6 +130,14 @@
   font-size: 24px;
   color: var(--text-color);
   font-weight: 600;
+  display: inline;
+}
+
+.repo-view-mode {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  font-weight: normal;
+  margin-left: 8px;
 }
 
 .repo-content-title p {

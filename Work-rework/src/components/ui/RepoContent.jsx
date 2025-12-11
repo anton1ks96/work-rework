@@ -22,7 +22,7 @@ DownloadIcon.propTypes = {
   className: PropTypes.string,
 };
 
-const RepoContent = ({ studentId, studentName, studentAvatar, onBack }) => {
+const RepoContent = ({ studentId, studentName, studentAvatar, repositoryName, onBack, onBackToStudents }) => {
   const [contents, setContents] = useState([]);
   const [currentPath, setCurrentPath] = useState('');
   const [pathHistory, setPathHistory] = useState([]);
@@ -69,7 +69,7 @@ const RepoContent = ({ studentId, studentName, studentAvatar, onBack }) => {
     }, 45000);
 
     try {
-      const data = await fetchRepoContents(studentId, path, controller.signal);
+      const data = await fetchRepoContents(studentId, repositoryName, path, controller.signal);
 
       clearTimeout(timeoutId);
 
@@ -141,7 +141,7 @@ const RepoContent = ({ studentId, studentName, studentAvatar, onBack }) => {
       setCurrentPath(item.path);
     } else if (item.type === 'file') {
       if (item.name.toLowerCase().endsWith('.html')) {
-        const htmlUrl = getHtmlUrl(studentId, item.path);
+        const htmlUrl = getHtmlUrl(studentId, repositoryName, item.path);
         window.open(htmlUrl, '_blank');
       } else if (item.download_url) {
         window.open(item.download_url, '_blank');
@@ -164,7 +164,7 @@ const RepoContent = ({ studentId, studentName, studentAvatar, onBack }) => {
     commitsLoadingRef.current = true;
     setCommitsLoading(true);
     try {
-      const data = await fetchCommits(studentId, page, itemsPerPage);
+      const data = await fetchCommits(studentId, repositoryName, page, itemsPerPage);
       console.log('API returned commits:', data.commits?.length, 'Page:', data.page);
       setCommits(data.commits || []);
       setTotalCommits(data.count || 0);
@@ -229,21 +229,43 @@ const RepoContent = ({ studentId, studentName, studentAvatar, onBack }) => {
       <div className="repo-content-container">
         <div className="repo-content-header">
           <div className="repo-content-title-row">
-            {onBack && (
-              <button className="repo-back-to-students-btn" onClick={onBack} title="К списку студентов">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-                  <path fill="currentColor" fillRule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
-                </svg>
-              </button>
-            )}
+            <div className="repo-navigation-buttons">
+              {onBackToStudents && (
+                <button
+                  className="repo-back-to-students-btn"
+                  onClick={onBackToStudents}
+                  title="К списку студентов"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                    <path fill="currentColor" fillRule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+                  </svg>
+                  <span>К студентам</span>
+                </button>
+              )}
+              {onBack && (
+                <button
+                  className="repo-back-to-repos-btn"
+                  onClick={onBack}
+                  title="К репозиториям"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                    <path fill="currentColor" fillRule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+                  </svg>
+                  <span>К репозиториям</span>
+                </button>
+              )}
+            </div>
             <div className="repo-content-title">
-              <h2>{viewMode === 'commits' ? 'История коммитов' : 'Репозиторий'}</h2>
+              <h2>{repositoryName}</h2>
+              <span className="repo-view-mode">
+                {viewMode === 'commits' ? ' • История коммитов' : ' • Файлы'}
+              </span>
             </div>
             <div className="repo-header-actions">
               {viewMode === 'files' ? (
                 <>
                   <a
-                    href={getArchiveUrl(studentId, '')}
+                    href={getArchiveUrl(studentId, repositoryName, '')}
                     className="repo-history-btn"
                     title="Скачать весь репозиторий как ZIP"
                     onClick={(e) => e.stopPropagation()}
@@ -361,7 +383,7 @@ const RepoContent = ({ studentId, studentName, studentAvatar, onBack }) => {
                     <div className="repo-list-item-download">
                       {item.type === 'dir' && (
                         <a
-                          href={getArchiveUrl(studentId, item.path)}
+                          href={getArchiveUrl(studentId, repositoryName, item.path)}
                           className="repo-download-link"
                           onClick={(e) => e.stopPropagation()}
                           title="Скачать папку как ZIP"
@@ -491,7 +513,9 @@ RepoContent.propTypes = {
   studentId: PropTypes.string.isRequired,
   studentName: PropTypes.string.isRequired,
   studentAvatar: PropTypes.string,
+  repositoryName: PropTypes.string.isRequired,
   onBack: PropTypes.func,
+  onBackToStudents: PropTypes.func,
 };
 
 export default RepoContent;

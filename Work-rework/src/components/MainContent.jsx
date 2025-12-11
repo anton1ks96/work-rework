@@ -4,6 +4,7 @@ import styles from "../styles/MainContent.module.css";
 import "../styles/index.css";
 import StudentCard from "./ui/StudentCard";
 import RepoContent from "./ui/RepoContent";
+import RepositoryList from "./ui/RepositoryList";
 import Loader from "./ui/Loader";
 import { fetchGroups, fetchStudents, searchStudents } from "../services/api";
 import { validateSearchQuery } from "../utils/searchValidation";
@@ -20,6 +21,7 @@ const MainContent = ({
     const [selectedGroup, setSelectedGroup] = useState(null);
     const [displayedGroup, setDisplayedGroup] = useState(null);
     const [selectedStudent, setSelectedStudent] = useState(null);
+    const [selectedRepository, setSelectedRepository] = useState(null);
     const [isTransitioning, setIsTransitioning] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isContentLoading, setIsContentLoading] = useState(false);
@@ -197,10 +199,20 @@ const MainContent = ({
 
     const handleStudentClick = (student) => {
         setSelectedStudent(student);
+        setSelectedRepository(null);
+    };
+
+    const handleRepositoryClick = (repository) => {
+        setSelectedRepository(repository);
     };
 
     const handleBackToStudents = () => {
         setSelectedStudent(null);
+        setSelectedRepository(null);
+    };
+
+    const handleBackToRepositories = () => {
+        setSelectedRepository(null);
     };
     const handleMobileSidebarClose = () => setIsMobileSidebarVisible(false);
     const handleOverlayClick = (e) => {
@@ -265,12 +277,24 @@ const MainContent = ({
                     </div>
                 )}
                 {selectedStudent ? (
-                    <RepoContent
-                        studentId={selectedStudent.id}
-                        studentName={`${selectedStudent.last_name} ${selectedStudent.first_name}`}
-                        studentAvatar={selectedStudent.avatar_path}
-                        onBack={handleBackToStudents}
-                    />
+                    selectedRepository ? (
+                        <RepoContent
+                            studentId={selectedStudent.id}
+                            studentName={`${selectedStudent.last_name} ${selectedStudent.first_name}`}
+                            studentAvatar={selectedStudent.avatar_path}
+                            repositoryName={selectedRepository.name}
+                            onBack={handleBackToRepositories}
+                            onBackToStudents={handleBackToStudents}
+                        />
+                    ) : (
+                        <RepositoryList
+                            studentId={selectedStudent.id}
+                            studentName={`${selectedStudent.last_name} ${selectedStudent.first_name}`}
+                            studentAvatar={selectedStudent.avatar_path}
+                            onBack={handleBackToStudents}
+                            onSelectRepository={handleRepositoryClick}
+                        />
+                    )
                 ) : selectedGroup || searchQuery ? (
                     hasError ? (
                         <div className={styles.emptyState}>

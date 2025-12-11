@@ -123,15 +123,62 @@ export const searchStudents = async (query) => {
     }
 };
 
-// FETCH REPO CONTENTS
-// PARAMS: user_id (e.g., "i24s0002"), path (optional)
-// RETURNS: array of repo content items
+/**
+ * Fetches all repositories for a specific user
+ * @param {string} userId - User ID (e.g., "i24s0002")
+ * @returns {Promise<Object>} Object with count and repositories array
+ * @example
+ * fetchUserRepositories('i24s0002')
+ * // => { count: 2, repositories: [{ name: "Work" }, { name: "personal-project" }] }
+ */
+export const fetchUserRepositories = async (userId) => {
+    try {
+        const response = await fetch(
+            `${API_BASE_URL}/api/v1/repos/${encodeURIComponent(userId)}`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
 
-export const fetchRepoContents = async (user_id, path = "", signal = null) => {
+        if (!response.ok) {
+            throw new Error(`Failed to fetch repositories: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        return {
+            count: data.count || 0,
+            repositories: data.repositories || []
+        };
+    } catch (error) {
+        console.error(`Error fetching repositories for user ${userId}:`, error);
+        throw error;
+    }
+};
+
+/**
+ * Fetches repository contents (files and folders)
+ * @param {string} user_id - User ID (e.g., "i24s0002")
+ * @param {string} repoName - Repository name (e.g., "Work", "personal-project")
+ * @param {string} path - Path within repository (optional)
+ * @param {AbortSignal} signal - AbortController signal for cancellation (optional)
+ * @returns {Promise<Array<Object>>} Array of repo content items
+ * @example
+ * fetchRepoContents('i24s0002', 'Work', '')
+ * // => [{ name: "file.txt", type: "file", ... }, ...]
+ */
+export const fetchRepoContents = async (user_id, repoName, path = "", signal = null) => {
     try {
         const endpoint = path && path.trim()
-            ? `${API_BASE_URL}/api/v1/repos/${user_id}/Work/contents?path=${encodeURIComponent(path)}`
-            : `${API_BASE_URL}/api/v1/repos/${user_id}/Work/contents`;
+            ? `${API_BASE_URL}/api/v1/repos/${user_id}/${encodeURIComponent(repoName)}/contents?path=${encodeURIComponent(path)}`
+            : `${API_BASE_URL}/api/v1/repos/${user_id}/${encodeURIComponent(repoName)}/contents`;
 
         const response = await fetch(endpoint, {
             method: "GET",
@@ -150,7 +197,7 @@ export const fetchRepoContents = async (user_id, path = "", signal = null) => {
                 } else if (errorData.message) {
                     errorMessage = errorData.message;
                 }
-            } catch (e) {
+            } catch {
                 errorMessage = response.statusText || errorMessage;
             }
 
@@ -176,16 +223,17 @@ export const fetchRepoContents = async (user_id, path = "", signal = null) => {
 /**
  * Fetches commits from a repository
  * @param {string} userId - User ID (e.g., "i24s0002")
+ * @param {string} repoName - Repository name (e.g., "Work", "personal-project")
  * @param {number} page - Page number (default: 1)
  * @param {number} perPage - Items per page (default: 20)
  * @returns {Promise<Object>} Object with count and commits array
  * @example
- * fetchCommits('i24s0002', 1, 20)
+ * fetchCommits('i24s0002', 'Work', 1, 20)
  * // => { count: 20, commits: [...] }
  */
-export const fetchCommits = async (userId, page = 1, perPage = 20) => {
+export const fetchCommits = async (userId, repoName, page = 1, perPage = 20) => {
     try {
-        const endpoint = `${API_BASE_URL}/api/v1/repos/${userId}/Work/commits?page=${page}&per_page=${perPage}`;
+        const endpoint = `${API_BASE_URL}/api/v1/repos/${userId}/${encodeURIComponent(repoName)}/commits?page=${page}&per_page=${perPage}`;
 
         const response = await fetch(endpoint, {
             method: "GET",
@@ -216,38 +264,40 @@ export const fetchCommits = async (userId, page = 1, perPage = 20) => {
  * Generates URL for opening HTML file in a new tab
  * The backend automatically inserts <base> tag to resolve relative paths
  * @param {string} userId - User ID (e.g., "i24s0002")
+ * @param {string} repoName - Repository name (e.g., "Work", "personal-project")
  * @param {string} path - Path to HTML file in repository
  * @returns {string} Full URL to open HTML file
  * @example
- * getHtmlUrl('i24s0002', 'index.html')
+ * getHtmlUrl('i24s0002', 'Work', 'index.html')
  * // => 'http://localhost:8070/api/v1/repos/i24s0002/Work/branches/main/html/index.html'
  *
- * getHtmlUrl('i24s0002', '!__HISTORY_NEW/index.html')
+ * getHtmlUrl('i24s0002', 'Work', '!__HISTORY_NEW/index.html')
  * // => 'http://localhost:8070/api/v1/repos/i24s0002/Work/branches/main/html/!__HISTORY_NEW/index.html'
  */
-export const getHtmlUrl = (userId, path) => {
-    return `${API_BASE_URL}/api/v1/repos/${userId}/Work/branches/main/html/${path}`;
+export const getHtmlUrl = (userId, repoName, path) => {
+    return `${API_BASE_URL}/api/v1/repos/${userId}/${encodeURIComponent(repoName)}/branches/main/html/${path}`;
 };
 
 /**
  * Generates URL for downloading repository or folder as ZIP archive
  * @param {string} userId - User ID (e.g., "i24s0002")
+ * @param {string} repoName - Repository name (e.g., "Work", "personal-project")
  * @param {string} path - Path to folder (empty for whole repository)
  * @param {string} branch - Branch name (default: "main")
  * @returns {string} Full URL to download ZIP archive
  * @example
- * getArchiveUrl('i24s0002')
+ * getArchiveUrl('i24s0002', 'Work')
  * // => 'http://git.students.it-college.ru:8080/i24s0002/Work/archive/main.zip'
  *
- * getArchiveUrl('i24s0002', 'diskretka')
+ * getArchiveUrl('i24s0002', 'Work', 'diskretka')
  * // => 'http://git.students.it-college.ru:8080/i24s0002/Work/archive/diskretka/main.zip'
  */
-export const getArchiveUrl = (userId, path = '', branch = 'main') => {
+export const getArchiveUrl = (userId, repoName, path = '', branch = 'main') => {
     const baseUrl = 'http://git.students.it-college.ru:8080';
     if (!path) {
         // Download entire repository
-        return `${baseUrl}/${userId}/Work/archive/${branch}.zip`;
+        return `${baseUrl}/${userId}/${encodeURIComponent(repoName)}/archive/${branch}.zip`;
     }
     // Download specific folder
-    return `${baseUrl}/${userId}/Work/archive/${path}/${branch}.zip`;
+    return `${baseUrl}/${userId}/${encodeURIComponent(repoName)}/archive/${path}/${branch}.zip`;
 };
