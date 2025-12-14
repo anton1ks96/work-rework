@@ -1,5 +1,4 @@
-const API_BASE_URL =
-    import.meta.env.API_BASE_URL || "http://localhost:8070";
+const API_BASE_URL = import.meta.env.API_BASE_URL || "";
 
 /**
  * Fetches all groups from the backend
