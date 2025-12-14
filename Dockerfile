@@ -9,7 +9,7 @@ COPY Work-rework/ .
 
 RUN npm run build
 
-RUN npm install -g serve
+RUN npm config set registry https://registry.npmmirror.com && npm install -g serve
 
 EXPOSE 5172
 
