@@ -27,16 +27,16 @@ export const fetchGroups = async () => {
 };
 
 /**
- * Fetches students for a specific group
- * @param {string} groupName - Group name (e.g., "ИТ21-11")
- * @returns {Promise<Array<Object>>} Array of student objects
+ * Fetches subgroups for a specific group
+ * @param {string} groupName - Group name (e.g., "ИТ24-11")
+ * @returns {Promise<Object>} Subgroup data:
+ *   - Course 1: { english: [...], course: 1 }
+ *   - Course 2-3: { english: [...], profiles: [...], course: 2|3 }
  */
-export const fetchStudents = async (groupName) => {
+export const fetchSubgroups = async (groupName) => {
     try {
         const response = await fetch(
-            `${API_BASE_URL}/api/v1/groups/${encodeURIComponent(
-                groupName
-            )}/students`,
+            `${API_BASE_URL}/api/v1/groups/${encodeURIComponent(groupName)}/subgroups`,
             {
                 method: "GET",
                 headers: {
@@ -44,6 +44,37 @@ export const fetchStudents = async (groupName) => {
                 },
             }
         );
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch subgroups: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error(`Error fetching subgroups for group ${groupName}:`, error);
+        throw error;
+    }
+};
+
+/**
+ * Fetches students for a specific group
+ * @param {string} groupName - Group name (e.g., "ИТ21-11")
+ * @param {string|null} subgroup - Optional subgroup name to filter by
+ * @returns {Promise<Array<Object>>} Array of student objects
+ */
+export const fetchStudents = async (groupName, subgroup = null) => {
+    try {
+        let url = `${API_BASE_URL}/api/v1/groups/${encodeURIComponent(groupName)}/students`;
+        if (subgroup) {
+            url += `?subgroup=${encodeURIComponent(subgroup)}`;
+        }
+
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
 
         if (!response.ok) {
             throw new Error(`Failed to fetch students: ${response.status}`);

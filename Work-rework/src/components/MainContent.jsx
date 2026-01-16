@@ -6,7 +6,7 @@ import StudentCard from "./ui/StudentCard";
 import RepoContent from "./ui/RepoContent";
 import RepositoryList from "./ui/RepositoryList";
 import Loader from "./ui/Loader";
-import { fetchGroups, fetchStudents, searchStudents } from "../services/api";
+import { fetchGroups, fetchStudents, fetchSubgroups, searchStudents } from "../services/api";
 import { validateSearchQuery } from "../utils/searchValidation";
 
 const MainContent = ({
@@ -34,6 +34,12 @@ const MainContent = ({
     const [searchResults, setSearchResults] = useState([]);
     const [searchValidation, setSearchValidation] = useState(null);
     const [hasError, setHasError] = useState(false);
+
+    const [subgroups, setSubgroups] = useState(null);
+    const [selectedEnglishSubgroup, setSelectedEnglishSubgroup] = useState(null);
+    const [selectedProfile, setSelectedProfile] = useState(null);
+    const [isSubgroupsLoading, setIsSubgroupsLoading] = useState(false);
+    const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
 
     useEffect(() => {
         const loadGroups = async () => {
@@ -72,6 +78,10 @@ const MainContent = ({
 
     useEffect(() => {
         if (!displayedGroup) {
+            setSubgroups(null);
+            setSelectedEnglishSubgroup(null);
+            setSelectedProfile(null);
+            setIsFilterDropdownOpen(false);
             setUsers([]);
             setHasError(false);
             return;
@@ -80,16 +90,12 @@ const MainContent = ({
         const loadStudents = async () => {
             setIsContentLoading(true);
             setHasError(false);
-
             try {
                 const studentsData = await fetchStudents(displayedGroup);
                 setUsers(studentsData);
                 setHasError(false);
             } catch (error) {
-                console.error(
-                    `Ошибка при загрузке студентов группы ${displayedGroup}:`,
-                    error
-                );
+                console.error(`Error loading students for ${displayedGroup}:`, error);
                 setUsers([]);
                 setHasError(true);
             } finally {
@@ -99,6 +105,31 @@ const MainContent = ({
 
         loadStudents();
     }, [displayedGroup]);
+
+    useEffect(() => {
+        if (!displayedGroup) return;
+        if (!selectedEnglishSubgroup && !selectedProfile) return;
+
+        const loadFilteredStudents = async () => {
+            setIsContentLoading(true);
+            setHasError(false);
+
+            try {
+                const subgroupFilter = selectedEnglishSubgroup || selectedProfile || null;
+                const studentsData = await fetchStudents(displayedGroup, subgroupFilter);
+                setUsers(studentsData);
+                setHasError(false);
+            } catch (error) {
+                console.error(`Error loading filtered students:`, error);
+                setUsers([]);
+                setHasError(true);
+            } finally {
+                setIsContentLoading(false);
+            }
+        };
+
+        loadFilteredStudents();
+    }, [displayedGroup, selectedEnglishSubgroup, selectedProfile]);
 
     useEffect(() => {
         const handleResize = () => {
@@ -174,6 +205,11 @@ const MainContent = ({
     const handleGroupClick = (group) => {
         setSelectedStudent(null);
 
+        setSubgroups(null);
+        setSelectedEnglishSubgroup(null);
+        setSelectedProfile(null);
+        setIsFilterDropdownOpen(false);
+
         setSearchQuery("");
         setSearchInput("");
         setSearchResults([]);
@@ -226,6 +262,47 @@ const MainContent = ({
 
     const closeCompactSearch = () => setIsCompactSearchOpen(false);
 
+    const handleEnglishSubgroupSelect = (subgroup) => {
+        if (selectedEnglishSubgroup === subgroup) {
+            setSelectedEnglishSubgroup(null);
+        } else {
+            setSelectedEnglishSubgroup(subgroup);
+            setSelectedProfile(null); 
+        }
+    };
+
+    const handleProfileSelect = (profile) => {
+        if (selectedProfile === profile) {
+            setSelectedProfile(null);
+        } else {
+            setSelectedProfile(profile);
+            setSelectedEnglishSubgroup(null);
+        }
+    };
+
+    const handleClearFilters = () => {
+        setSelectedEnglishSubgroup(null);
+        setSelectedProfile(null);
+    };
+
+    const toggleFilterDropdown = async () => {
+        if (!isFilterDropdownOpen && !subgroups && displayedGroup) {
+            setIsSubgroupsLoading(true);
+            setIsFilterDropdownOpen(true);
+            try {
+                const data = await fetchSubgroups(displayedGroup);
+                setSubgroups(data);
+            } catch (error) {
+                console.error(`Error loading subgroups for ${displayedGroup}:`, error);
+                setSubgroups(null);
+            } finally {
+                setIsSubgroupsLoading(false);
+            }
+        } else {
+            setIsFilterDropdownOpen(prev => !prev);
+        }
+    };
+
     return (
         <div className={`${styles.container} arbitraryClass`}>
             {!isMobile && (
@@ -252,6 +329,75 @@ const MainContent = ({
                                     >
                                         {group}
                                     </button>
+                                    {/* Filter dropdown under selected group */}
+                                    {selectedGroup === group && (
+                                        <div className={styles.filterDropdownContainer}>
+                                            <button
+                                                className={`${styles.filterToggleBtn} ${isFilterDropdownOpen ? styles.open : ''}`}
+                                                onClick={toggleFilterDropdown}
+                                            >
+                                                <span>Фильтр</span>
+                                                <span className={styles.filterArrow}>{isFilterDropdownOpen ? '▲' : '▼'}</span>
+                                                {(selectedEnglishSubgroup || selectedProfile) && (
+                                                    <span className={styles.filterBadge}>●</span>
+                                                )}
+                                            </button>
+                                            {isFilterDropdownOpen && (
+                                                <div className={styles.filterDropdown}>
+                                                    {isSubgroupsLoading ? (
+                                                        <div className={styles.filterLoading}>
+                                                            <Loader type="spinner" />
+                                                        </div>
+                                                    ) : subgroups ? (
+                                                        <>
+                                                            {subgroups.english?.length > 0 && (
+                                                                <div className={styles.filterSection}>
+                                                                    <div className={styles.filterSectionTitle}>Английский</div>
+                                                                    <div className={styles.filterOptions}>
+                                                                        {subgroups.english.map((eng) => (
+                                                                            <button
+                                                                                key={eng}
+                                                                                className={`${styles.filterOption} ${selectedEnglishSubgroup === eng ? styles.selected : ''}`}
+                                                                                onClick={() => handleEnglishSubgroupSelect(eng)}
+                                                                            >
+                                                                                {eng}
+                                                                            </button>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            {subgroups.profiles?.length > 0 && (
+                                                                <div className={styles.filterSection}>
+                                                                    <div className={styles.filterSectionTitle}>Профиль</div>
+                                                                    <div className={styles.filterOptions}>
+                                                                        {subgroups.profiles.map((profile) => (
+                                                                            <button
+                                                                                key={profile}
+                                                                                className={`${styles.filterOption} ${selectedProfile === profile ? styles.selected : ''}`}
+                                                                                onClick={() => handleProfileSelect(profile)}
+                                                                            >
+                                                                                {profile}
+                                                                            </button>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            {(selectedEnglishSubgroup || selectedProfile) && (
+                                                                <button
+                                                                    className={styles.clearFiltersBtn}
+                                                                    onClick={handleClearFilters}
+                                                                >
+                                                                    Сбросить фильтры
+                                                                </button>
+                                                            )}
+                                                        </>
+                                                    ) : (
+                                                        <div className={styles.filterError}>Не удалось загрузить</div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                     {group !== groups[groups.length - 1] &&
                                         group.split("-")[0] !==
                                             groups[index + 1]?.split(
@@ -374,6 +520,78 @@ const MainContent = ({
                                     >
                                         {group}
                                     </button>
+                                    {/* Filter dropdown under selected group (mobile) */}
+                                    {selectedGroup === group && (
+                                        <div className={styles.filterDropdownContainer}>
+                                            <button
+                                                className={`${styles.filterToggleBtn} ${isFilterDropdownOpen ? styles.open : ''}`}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    toggleFilterDropdown();
+                                                }}
+                                            >
+                                                <span>Фильтр</span>
+                                                <span className={styles.filterArrow}>{isFilterDropdownOpen ? '▲' : '▼'}</span>
+                                                {(selectedEnglishSubgroup || selectedProfile) && (
+                                                    <span className={styles.filterBadge}>●</span>
+                                                )}
+                                            </button>
+                                            {isFilterDropdownOpen && (
+                                                <div className={styles.filterDropdown}>
+                                                    {isSubgroupsLoading ? (
+                                                        <div className={styles.filterLoading}>
+                                                            <Loader type="spinner" />
+                                                        </div>
+                                                    ) : subgroups ? (
+                                                        <>
+                                                            {subgroups.english?.length > 0 && (
+                                                                <div className={styles.filterSection}>
+                                                                    <div className={styles.filterSectionTitle}>Английский</div>
+                                                                    <div className={styles.filterOptions}>
+                                                                        {subgroups.english.map((eng) => (
+                                                                            <button
+                                                                                key={eng}
+                                                                                className={`${styles.filterOption} ${selectedEnglishSubgroup === eng ? styles.selected : ''}`}
+                                                                                onClick={() => handleEnglishSubgroupSelect(eng)}
+                                                                            >
+                                                                                {eng}
+                                                                            </button>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            {subgroups.profiles?.length > 0 && (
+                                                                <div className={styles.filterSection}>
+                                                                    <div className={styles.filterSectionTitle}>Профиль</div>
+                                                                    <div className={styles.filterOptions}>
+                                                                        {subgroups.profiles.map((profile) => (
+                                                                            <button
+                                                                                key={profile}
+                                                                                className={`${styles.filterOption} ${selectedProfile === profile ? styles.selected : ''}`}
+                                                                                onClick={() => handleProfileSelect(profile)}
+                                                                            >
+                                                                                {profile}
+                                                                            </button>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            {(selectedEnglishSubgroup || selectedProfile) && (
+                                                                <button
+                                                                    className={styles.clearFiltersBtn}
+                                                                    onClick={handleClearFilters}
+                                                                >
+                                                                    Сбросить фильтры
+                                                                </button>
+                                                            )}
+                                                        </>
+                                                    ) : (
+                                                        <div className={styles.filterError}>Не удалось загрузить</div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                     {group !== groups[groups.length - 1] &&
                                         group.split("-")[0] !==
                                             groups[index + 1]?.split(
