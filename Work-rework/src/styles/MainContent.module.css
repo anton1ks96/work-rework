@@ -570,6 +570,8 @@ body {
         transition: transform 0.3s ease;
         transform: translateX(100%);
         padding: 16px 12px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .sidebarMobileVisible {
