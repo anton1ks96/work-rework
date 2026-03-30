@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.API_BASE_URL || "";
+const API_BASE_URL = import.meta.env.API_BASE_URL || import.meta.env.BASE_URL.replace(/\/$/, "");
 
 /**
  * Fetches all groups from the backend

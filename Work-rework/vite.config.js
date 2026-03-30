@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
   console.log('API_BASE_URL:', env.API_BASE_URL)
 
   return {
-    base: '',
+    base: '/WORK/',
     plugins: [react()],
     server: {
       port: 5172,
